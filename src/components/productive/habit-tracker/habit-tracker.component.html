@@ -1,0 +1,108 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-4xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Habit Tracker</h1>
+    <p class="text-gray-400">Build consistency one day at a time.</p>
+  </header>
+
+  <!-- Add Habit Section -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-3" [style.color]="'var(--theme-color-primary)'">Add New Habit</h2>
+        <form (submit)="addHabit()" class="flex gap-2">
+          <input 
+            type="text" 
+            [(ngModel)]="newHabitName"
+            name="newHabitName"
+            placeholder="e.g., Drink 8 glasses of water" 
+            class="flex-grow futuristic-input">
+          <button type="submit" class="futuristic-btn btn-primary">Add</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Habit Grid -->
+  <section class="futuristic-card">
+    <div class="card-content">
+      <div class="relative z-10 overflow-x-auto">
+        <div class="grid gap-2 p-4" [style.grid-template-columns]="'minmax(120px, 2fr) repeat(7, minmax(40px, 1fr))'">
+          <!-- Header Row -->
+          <div class="font-bold text-gray-400">Habit</div>
+          @for(date of weekDates(); track date) {
+            <div class="text-center font-semibold" [class.text-cyan-400]="isToday(date)" [style.color]="isToday(date) ? 'var(--theme-color-primary)' : ''">
+              <p class="text-xs">{{ date.toLocaleString('default', { weekday: 'short' }) }}</p>
+              <p>{{ date.getDate() }}</p>
+            </div>
+          }
+
+          <!-- Habit Rows -->
+          @for(habit of habits(); track habit.id) {
+            <div class="flex items-center justify-between col-span-1 pr-2 border-t border-white/10 pt-2">
+               <span class="truncate">{{ habit.name }}</span>
+               <button (click)="deleteHabit(habit.id)" class="text-gray-500 hover:text-red-400 text-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5Z" clip-rule="evenodd" /></svg>
+               </button>
+            </div>
+            @for(date of weekDates(); track date) {
+              <div class="flex items-center justify-center border-t border-white/10 pt-2">
+                <button 
+                  class="w-8 h-8 rounded-md border-2 transition-all duration-200"
+                  [class.bg-cyan-500]="isCompleted(habit, date)"
+                  [style.background-color]="isCompleted(habit, date) ? 'var(--theme-color-primary)' : 'transparent'"
+                  [class.border-cyan-400]="isCompleted(habit, date)"
+                  [style.border-color]="isCompleted(habit, date) ? 'var(--theme-color-primary)' : 'rgba(255,255,255,0.2)'"
+                  [class.hover:bg-white/20]="!isCompleted(habit, date)"
+                  (click)="toggleCompletion(habit.id, date)">
+                  @if(isCompleted(habit, date)) {
+                     <span class="font-bold text-black">✓</span>
+                  }
+                </button>
+              </div>
+            }
+          } @empty {
+            <p class="col-span-8 text-center text-gray-500 py-8">No habits added yet. Add one above to get started!</p>
+          }
+        </div>
+        
+        @if (habits().length > 0) {
+            <div class="p-4 border-t border-white/10 mt-2 flex flex-col items-center">
+                <button (click)="claimBonus()" class="futuristic-btn btn-primary" [disabled]="!allHabitsCompletedToday() || bonusClaimedToday()">
+                    @if (bonusClaimedToday()) {
+                        Bonus Claimed!
+                    } @else if (allHabitsCompletedToday()) {
+                        🎉 Claim Daily Bonus! (50 XP, 10 🪙)
+                    } @else {
+                        Complete all habits for a bonus!
+                    }
+                </button>
+            </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Undo Notification -->
+  @if (undoState(); as state) {
+    <div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md animate-undo-bar-enter">
+      <div class="futuristic-card no-hover-transform p-3">
+        <div class="card-content">
+          <div class="relative z-10 flex items-center justify-between gap-4">
+            <p class="text-sm text-gray-300">
+              @if (state.action === 'delete') {
+                Habit deleted.
+              } @else {
+                Habit updated.
+              }
+            </p>
+            <button (click)="undoLastAction()" class="futuristic-btn btn-primary text-sm !py-1.5 !px-4">Undo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

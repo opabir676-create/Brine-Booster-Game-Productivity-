@@ -1,0 +1,82 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-md mx-auto">
+  <header class="text-center relative">
+    <a routerLink="/productive" class="absolute top-0 left-0 inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+      Tools
+    </a>
+    <div class="pt-8 md:pt-0">
+        <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Pomodoro Timer</h1>
+        <p class="text-gray-400">Stay focused and take effective breaks.</p>
+    </div>
+  </header>
+
+  <section class="futuristic-card p-8">
+    <div class="card-content">
+      <div class="relative z-10 flex flex-col items-center gap-6">
+        <!-- Mode Buttons -->
+        <div class="flex gap-2 bg-black/40 p-1.5 rounded-full">
+          <button 
+            class="px-4 py-2 text-sm font-semibold rounded-full transition-colors"
+            [class.text-black]="mode() === 'work'"
+            [style.background-color]="mode() === 'work' ? 'var(--theme-color-primary)' : 'transparent'"
+            (click)="setMode('work')">
+            Work
+          </button>
+          <button 
+            class="px-4 py-2 text-sm font-semibold rounded-full transition-colors"
+            [class.text-black]="mode() === 'shortBreak'"
+            [style.background-color]="mode() === 'shortBreak' ? 'var(--theme-color-primary)' : 'transparent'"
+            (click)="setMode('shortBreak')">
+            Short Break
+          </button>
+          <button 
+            class="px-4 py-2 text-sm font-semibold rounded-full transition-colors"
+            [class.text-black]="mode() === 'longBreak'"
+            [style.background-color]="mode() === 'longBreak' ? 'var(--theme-color-primary)' : 'transparent'"
+            (click)="setMode('longBreak')">
+            Long Break
+          </button>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="relative w-64 h-64 flex items-center justify-center">
+          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="timer-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" [attr.stop-color]="settingsService.themeColor()"/>
+                <stop offset="100%" [attr.stop-color]="settingsService.cardGlowColor()"/>
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.15)" stroke-width="6" fill="none" />
+            <circle 
+              cx="50" cy="50" r="45" 
+              stroke="url(#timer-gradient)"
+              stroke-width="6" fill="none"
+              stroke-linecap="round"
+              transform="rotate(-90 50 50)"
+              [style.stroke-dasharray]="2 * 45 * 3.14159"
+              [style.stroke-dashoffset]="(2 * 45 * 3.14159) * (1 - progress() / 100)"
+              class="transition-all duration-500"
+            />
+          </svg>
+          <div class="text-center">
+            <p class="text-6xl font-bold font-mono tracking-tighter">{{ minutes() }}:{{ seconds() }}</p>
+            <p class="text-gray-400 capitalize">{{ mode() === 'shortBreak' ? 'Short Break' : mode() === 'longBreak' ? 'Long Break' : 'Work' }}</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-4">
+          <button (click)="startPauseTimer()" class="futuristic-btn btn-primary w-40 text-2xl py-3">
+            {{ isActive() ? 'Pause' : 'Start' }}
+          </button>
+          <button (click)="resetTimer()" title="Reset Timer" class="p-4 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6">
+              <path fill-rule="evenodd" d="M15.312 5.312a.75.75 0 0 1 0 1.061L12.439 9.25H14.25a.75.75 0 0 1 0 1.5H11.5a.75.75 0 0 1-.75-.75v-2.75a.75.75 0 0 1 1.5 0v1.811l2.872-2.872a.75.75 0 0 1 1.061 0ZM8.5 10.75a.75.75 0 0 1 .75.75v2.75a.75.75 0 0 1-1.5 0v-1.811l-2.872 2.872a.75.75 0 1 1-1.061-1.061L7.561 10.75H5.75a.75.75 0 0 1 0-1.5h2.75a.75.75 0 0 1 .75.75Z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

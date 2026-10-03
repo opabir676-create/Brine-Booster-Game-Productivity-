@@ -1,0 +1,87 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">AI Goal Setter</h1>
+    <p class="text-gray-400">Turn your big ambitions into a clear, step-by-step plan.</p>
+  </header>
+
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-3" [style.color]="'var(--theme-color-primary)'">Define Your Goal</h2>
+        <form (submit)="generatePlan()" class="flex flex-col gap-4">
+          <div>
+            <label for="goalPrompt" class="block text-sm font-medium text-gray-300 mb-2">What do you want to achieve?</label>
+            <textarea 
+              id="goalPrompt"
+              [(ngModel)]="goalPrompt"
+              name="goalPrompt"
+              placeholder="e.g., 'Get fit and run a 5k' or 'Learn to code in Python'..." 
+              class="futuristic-input min-h-[80px] resize-y w-full"></textarea>
+          </div>
+          <button type="submit" class="futuristic-btn btn-primary" [disabled]="state() === 'loading' || !goalPrompt().trim()">
+            {{ state() === 'loading' ? 'Generating Plan...' : 'Generate Plan' }}
+          </button>
+          @if(!isApiKeyValid) {
+            <p class="text-center text-yellow-400 text-sm mt-2">A valid Gemini API key is required.</p>
+          }
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="min-h-[200px]">
+    @switch (state()) {
+      @case ('loading') {
+        <div class="flex flex-col items-center justify-center text-center futuristic-card p-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+          <p class="text-gray-400 mt-4">The AI is creating your roadmap...</p>
+        </div>
+      }
+      @case ('success') {
+        @if (goalPlan().length > 0) {
+          <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-semibold text-glow" [style.color]="'var(--theme-color-primary)'">Your Action Plan</h2>
+              <div class="flex gap-2">
+                 <button (click)="copyPlan()" class="futuristic-btn !py-2 !px-3 flex items-center gap-2" style="background-color: rgba(255,255,255,0.1)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M4.5 2A1.5 1.5 0 0 0 3 3.5v9A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5v-3.379a3 3 0 0 1-1.5-.94V12.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h3.379c.318-.564.75-1.05 1.27-1.409A2.99 2.99 0 0 1 8.12 2H4.5Z" /><path d="M12.5 0A1.5 1.5 0 0 0 11 1.5v5A1.5 1.5 0 0 0 12.5 8h3A1.5 1.5 0 0 0 17 6.5v-5A1.5 1.5 0 0 0 15.5 0h-3ZM12 6.5V1.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5Z" /></svg>
+                  <span>{{ isCopied() ? 'Copied!' : 'Copy' }}</span>
+                </button>
+                <button (click)="savePlan()" class="futuristic-btn btn-primary !py-2 !px-3 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1H2V3Z" /><path fill-rule="evenodd" d="M13 13.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5V5h10v8.5ZM5.5 7a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Z" clip-rule="evenodd" /></svg>
+                  <span>{{ isSaved() ? 'Saved!' : 'Save' }}</span>
+                </button>
+              </div>
+            </div>
+            @for (item of goalPlan(); track item.step) {
+              <div class="futuristic-card p-4">
+                 <div class="card-content">
+                    <div class="relative z-10 flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <span class="flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg border-2" [style.border-color]="'var(--theme-color-primary)'" [style.color]="'var(--theme-color-primary)'">{{ item.step }}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">{{ item.title }}</h3>
+                            <p class="text-sm text-gray-300 mt-1">{{ item.description }}</p>
+                            <p class="text-xs font-semibold mt-2 px-2 py-1 rounded-full inline-block bg-white/10" [style.color]="'var(--theme-color-primary)'">{{ item.timeframe }}</p>
+                        </div>
+                    </div>
+                 </div>
+              </div>
+            }
+          </div>
+        }
+      }
+      @case ('error') {
+        <div class="futuristic-card p-8 text-center bg-red-900/50 border-red-500">
+          <h3 class="text-xl font-bold text-red-300">An Error Occurred</h3>
+          <p class="text-red-200 mt-2">{{ error() }}</p>
+        </div>
+      }
+    }
+  </section>
+</div>

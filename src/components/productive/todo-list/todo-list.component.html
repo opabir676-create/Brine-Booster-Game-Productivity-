@@ -1,0 +1,124 @@
+<style>
+  /* Custom checkbox with animation */
+  .task-checkbox .checkmark {
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .task-item.completed .task-checkbox .checkmark {
+    transform: scale(1);
+  }
+  .task-item .task-text {
+     transition: opacity 0.4s, text-decoration-color 0.4s;
+  }
+  .task-item.completed .task-text {
+    opacity: 0.6;
+    text-decoration: line-through;
+    text-decoration-color: var(--theme-color-primary);
+  }
+  .category-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  .category-btn.active {
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-primary);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+  }
+  .category-btn:hover:not(.active) {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+</style>
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-4xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">To-Do List</h1>
+    <p class="text-gray-400">Organize your tasks. You can use natural language like "Buy milk tomorrow high priority".</p>
+  </header>
+
+  <!-- Add Task -->
+  <section>
+    <form (submit)="$event.preventDefault(); parseAndAddTask()">
+      <div class="relative">
+        <input 
+          type="text" 
+          [ngModel]="newTaskText()"
+          (ngModelChange)="newTaskText.set($event)"
+          name="newTaskText"
+          placeholder="Add a new task..." 
+          class="w-full futuristic-input pl-6 pr-12 py-3 text-lg">
+        <button type="submit" [disabled]="!newTaskText().trim()" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors" [class.text-cyan-400]="newTaskText().trim()" [class.hover:bg-cyan-500/20]="newTaskText().trim()" [class.text-gray-600]="!newTaskText().trim()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Filters -->
+  <section class="futuristic-card p-4">
+    <div class="card-content">
+      <div class="relative z-10 space-y-3">
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="font-semibold text-gray-300 w-20">Status:</span>
+          <div class="flex gap-2 flex-wrap">
+            @for (filter of statusFilters; track filter.key) {
+              <button (click)="todoService.statusFilter.set(filter.key)" class="category-btn px-3 py-1 text-sm" [class.active]="todoService.statusFilter() === filter.key">{{ filter.label }}</button>
+            }
+          </div>
+        </div>
+        <div class="flex items-center gap-4 flex-wrap">
+          <span class="font-semibold text-gray-300 w-20">Priority:</span>
+          <div class="flex gap-2 flex-wrap">
+             @for (filter of priorityFilters; track filter.key) {
+              <button (click)="todoService.priorityFilter.set(filter.key)" class="category-btn px-3 py-1 text-sm capitalize" [class.active]="todoService.priorityFilter() === filter.key">{{ filter.label }}</button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Task List -->
+  <section class="flex flex-col gap-4">
+    @for (task of todoService.filteredTasks(); track trackById($index, task)) {
+      <div class="futuristic-card p-4 flex items-center gap-4 task-item" [class.completed]="task.completed">
+        <!-- Custom Checkbox -->
+        <button (click)="toggleTask(task.id)" class="task-checkbox flex-shrink-0 w-7 h-7 rounded-md border-2 flex items-center justify-center transition-colors" [class.border-cyan-400]="task.completed" [class.bg-cyan-400/30]="task.completed" [class.border-gray-600]="!task.completed" [style.border-color]="task.completed ? 'var(--theme-color-primary)' : ''" [style.background-color]="task.completed ? 'color-mix(in srgb, var(--theme-color-primary) 30%, transparent)' : 'transparent'">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5 text-white checkmark">
+            <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- Task Info -->
+        <div class="flex-grow">
+          <p class="task-text">{{ task.text }}</p>
+          <div class="flex items-center gap-3 text-xs mt-1 flex-wrap">
+            <span class="px-2 py-0.5 rounded-full capitalize" [class.bg-red-500/20]="task.priority === 'high'" [class.text-red-300]="task.priority === 'high'" [class.bg-yellow-500/20]="task.priority === 'medium'" [class.text-yellow-300]="task.priority === 'medium'" [class.bg-blue-500/20]="task.priority === 'low'" [class.text-blue-300]="task.priority === 'low'">
+              {{ task.priority }}
+            </span>
+            @if(task.dueDate) {
+              <span class="flex items-center gap-1" [class.text-red-400]="isPastDue(task.dueDate)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M4 1.75a.75.75 0 0 1 .75.75V3h6.5V2.5a.75.75 0 0 1 1.5 0V3h.25A2.75 2.75 0 0 1 15 5.75v7.5A2.75 2.75 0 0 1 12.25 16h-8.5A2.75 2.75 0 0 1 1 13.25v-7.5A2.75 2.75 0 0 1 3.75 3H4V2.5A.75.75 0 0 1 4 1.75ZM2.5 7.5v5.75c0 .69.56 1.25 1.25 1.25h8.5c.69 0 1.25-.56 1.25-1.25V7.5h-11Z" clip-rule="evenodd" /></svg>
+                {{ task.dueDate | date:'mediumDate' }}
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- Delete Button -->
+        <button (click)="deleteTask(task.id)" class="p-2 rounded-full text-gray-500 hover:text-red-400 hover:bg-red-500/20 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5Z" clip-rule="evenodd" /></svg>
+        </button>
+      </div>
+    } @empty {
+      <div class="futuristic-card p-8 text-center text-gray-400">
+        <p>No tasks found. Try changing your filters or adding a new task!</p>
+      </div>
+    }
+  </section>
+</div>

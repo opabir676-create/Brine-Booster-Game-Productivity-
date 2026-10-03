@@ -1,0 +1,70 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+    <a routerLink="/games" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+      Back to Games
+    </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Leaderboards</h1>
+    <p class="text-gray-400">See who is the best Brine Booster.</p>
+  </header>
+
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
+            <h2 class="text-xl font-semibold" [style.color]="'var(--theme-color-primary)'">Top Scores</h2>
+            <select (change)="onGameChange($event)" class="futuristic-input w-full md:w-auto">
+                @for(game of games; track game.id) {
+                    <option [value]="game.id">{{ game.name }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b-2 border-white/20">
+                <th class="p-3 text-center">Rank</th>
+                <th class="p-3">Name</th>
+                <th class="p-3 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for(entry of leaderboardData(); track entry.rank) {
+                <tr 
+                  class="border-b border-white/10 last:border-none transition-colors"
+                  [class.bg-cyan-500/20]="entry.name === 'User' && entry.score === userBestScore()"
+                  [class.font-bold]="entry.name === 'User' && entry.score === userBestScore()">
+                  <td class="p-3 text-center w-16">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full"
+                        [class.bg-yellow-400]="entry.rank === 1" [class.text-yellow-900]="entry.rank === 1"
+                        [class.bg-gray-400]="entry.rank === 2" [class.text-gray-900]="entry.rank === 2"
+                        [class.bg-yellow-700]="entry.rank === 3" [class.text-yellow-200]="entry.rank === 3"
+                    >
+                        {{ entry.rank }}
+                    </span>
+                  </td>
+                  <td class="p-3">{{ entry.name }}</td>
+                  <td class="p-3 text-right font-mono">{{ entry.score.toLocaleString() }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                    <td colspan="3" class="p-8 text-center text-gray-500">No scores available for this game yet.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (userBestScore() > 0) {
+            <div class="mt-4 p-3 rounded-lg border-2 border-dashed" [style.border-color]="'var(--theme-color-primary)'">
+              <div class="flex justify-between items-center">
+                <p class="font-bold">Your Best Score</p>
+                <p class="font-mono font-bold text-lg" [style.color]="'var(--theme-color-primary)'">{{ userBestScore().toLocaleString() }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>

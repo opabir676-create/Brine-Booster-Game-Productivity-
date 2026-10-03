@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Brine Booster</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --theme-color-primary: #00f2ff;
+      --card-smoke-opacity: 0.7;
+      --card-glow-color: #8e44ad;
+      --grid-line-intensity: 10%;
+      --card-lighting-opacity: 0.6;
+      --card-lighting-blur: 4px;
+      --card-hover-glow-size: 40px;
+      --card-shimmer-intensity: 10%;
+      --card-shimmer-color: #ffffff;
+      --card-lighting-speed: 1s;
+      --card-border-thickness: 2px;
+      --card-hover-translate-y: -5px;
+      --card-hover-scale: 1.05;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      opacity: 0.7;
+    }
+    .stars-1 {
+      background-image: 
+        radial-gradient(1px 1px at 20px 30px, white, rgba(255,255,255,0)),
+        radial-gradient(1px 1px at 80px 60px, white, rgba(255,255,255,0));
+      background-size: 200px 200px;
+      animation: move-stars-1 150s linear infinite;
+    }
+    .stars-2 {
+      background-image: 
+        radial-gradient(1px 1px at 50px 100px, white, rgba(255,255,255,0)),
+        radial-gradient(2px 2px at 120px 40px, white, rgba(255,255,255,0));
+      background-size: 300px 300px;
+      animation: move-stars-2 300s linear infinite;
+    }
+    @keyframes move-stars-1 {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(-100px, 200px); }
+    }
+    @keyframes move-stars-2 {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(150px, -100px); }
+    }
+
+    .background-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(color-mix(in srgb, var(--theme-color-primary) var(--grid-line-intensity), transparent) 1px, transparent 1px), 
+        linear-gradient(90deg, color-mix(in srgb, var(--theme-color-primary) var(--grid-line-intensity), transparent) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px;
+      animation: pan-grid 40s linear infinite;
+      z-index: 1;
+    }
+    
+    @keyframes pan-grid {
+      0% { background-position: 0 0; }
+      100% { background-position: 400px 400px; }
+    }
+
+    /* Main content must be on top of the grid */
+    app-root {
+      position: relative;
+      z-index: 2;
+    }
+    
+    @keyframes futuristic-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .animate-futuristic-fade-in {
+      animation: futuristic-fade-in 0.6s ease-out forwards;
+    }
+    
+    .futuristic-card {
+      position: relative;
+      background-image: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.6) 100%);
+      background-size: 100% 100%;
+      background-position: 0 0;
+      background-repeat: no-repeat;
+      border: 1px solid color-mix(in srgb, var(--theme-color-primary) 20%, transparent);
+      border-radius: 1rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform 0.1s linear, box-shadow 0.4s, border-color 0.4s;
+      overflow: hidden; /* Important for border animation */
+      transform-style: preserve-3d;
+      transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    }
+
+    .futuristic-card .card-content {
+      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateZ(20px);
+    }
+    body.card-hover-enabled .futuristic-card:hover .card-content {
+      transform: translateY(var(--card-hover-translate-y)) translateZ(40px);
+    }
+
+    .futuristic-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 1rem;
+      padding: var(--card-border-thickness, 2px);
+      -webkit-mask: 
+         linear-gradient(#fff 0 0) content-box, 
+         linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: var(--card-lighting-opacity, 0.6);
+      filter: blur(var(--card-lighting-blur, 4px));
+    }
+
+    /* --- Card Border Animations --- */
+    @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
+    /* 1. Rotate Animation */
+    @keyframes border-anim-rotate { to { --angle: 360deg; } }
+    body.card-border-rotate-enabled .futuristic-card::before {
+      background: conic-gradient(from var(--angle), transparent 40%, var(--theme-color-primary), transparent 60%);
+      animation: border-anim-rotate var(--card-lighting-speed, 1s) linear infinite;
+    }
+
+    /* 2. Pulse Animation */
+    @property --pulse-opacity { syntax: '<number>'; inherits: false; initial-value: 0.4; }
+    @keyframes border-anim-pulse { to { --pulse-opacity: 1; } }
+    body.card-border-pulse-enabled .futuristic-card::before {
+      background: var(--theme-color-primary);
+      opacity: calc(var(--card-lighting-opacity) * var(--pulse-opacity));
+      animation: border-anim-pulse calc(var(--card-lighting-speed) * 0.75) ease-in-out infinite alternate;
+    }
+    
+    /* 3. Chase Animation */
+    @property --chase-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes border-anim-chase { to { --chase-angle: 360deg; } }
+    body.card-border-chase-enabled .futuristic-card::before {
+      background: conic-gradient(
+        from var(--chase-angle), 
+        transparent 20%, var(--theme-color-primary) 30%, transparent 40%, 
+        transparent 70%, var(--card-glow-color) 80%, transparent 90%
+      );
+      animation: border-anim-chase var(--card-lighting-speed, 1s) linear infinite;
+    }
+    
+    /* 4. Sweep Animation */
+    @keyframes border-anim-sweep { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+    body.card-border-sweep-enabled .futuristic-card::before {
+      background: linear-gradient(90deg, transparent 20%, var(--theme-color-primary), transparent 80%);
+      background-size: 200% 100%;
+      animation: border-anim-sweep calc(var(--card-lighting-speed) * 1.2) ease-in-out infinite;
+    }
+
+    /* 5. Meteor Animation */
+    @keyframes border-anim-meteor { to { --angle: 450deg; } }
+    body.card-border-meteor-enabled .futuristic-card::before {
+        background: conic-gradient(
+            from var(--angle),
+            transparent 0, transparent 70%, var(--card-glow-color),
+            var(--theme-color-primary) 99.5%, transparent
+        );
+        animation: border-anim-meteor var(--card-lighting-speed, 1s) linear infinite;
+    }
+    
+    /* 6. Electric Animation */
+    @keyframes border-anim-electric {
+      0%, 100% { opacity: var(--card-lighting-opacity); }
+      5% { opacity: calc(var(--card-lighting-opacity) * 0.4); }
+      10% { opacity: var(--card-lighting-opacity); }
+      15% { opacity: calc(var(--card-lighting-opacity) * 0.6); }
+      25% { opacity: calc(var(--card-lighting-opacity) * 0.3); }
+      30% { opacity: var(--card-lighting-opacity); }
+    }
+    body.card-border-electric-enabled .futuristic-card::before {
+      background: var(--theme-color-primary);
+      animation: border-anim-electric calc(var(--card-lighting-speed) * 0.2) steps(1, end) infinite;
+    }
+
+
+    body.card-hover-enabled .futuristic-card:hover {
+      box-shadow: 0 0 var(--card-hover-glow-size, 40px) color-mix(in srgb, var(--theme-color-primary) 90%, transparent);
+      border-color: color-mix(in srgb, var(--theme-color-primary) 70%, transparent);
+    }
+    
+    body.card-hover-enabled.card-3d-enabled .futuristic-card:hover {
+      transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) translateY(var(--card-hover-translate-y)) scale(var(--card-hover-scale));
+    }
+
+    body.card-hover-enabled.card-3d-disabled .futuristic-card:hover {
+      transform: translateY(var(--card-hover-translate-y)) scale(var(--card-hover-scale));
+    }
+    
+    .futuristic-card.no-hover-transform:hover {
+      transform: translateY(0) scale(1) rotateX(0);
+    }
+    
+    /* Base style for all shimmer animations */
+    body.card-shimmer-enabled .futuristic-card {
+      background-image: 
+        linear-gradient(
+          110deg,
+          transparent 40%,
+          color-mix(in srgb, var(--card-shimmer-color) var(--card-shimmer-intensity), transparent) 50%,
+          transparent 60%
+        ),
+        radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.6) 100%);
+      background-size: 250% 100%, 100% 100%;
+    }
+
+    @keyframes shimmer-anim-slide {
+      from { background-position: 150% 0, 0 0; }
+      to { background-position: -50% 0, 0 0; }
+    }
+    body.card-shimmer-slide-enabled .futuristic-card {
+      animation: shimmer-anim-slide 4s infinite linear;
+    }
+    
+    @property --shimmer-opacity {
+      syntax: '<percentage>';
+      initial-value: 0%;
+      inherits: false;
+    }
+    @keyframes shimmer-anim-pulse {
+      0%, 100% { --shimmer-opacity: calc(var(--card-shimmer-intensity) * 0.5); }
+      50% { --shimmer-opacity: var(--card-shimmer-intensity); }
+    }
+    body.card-shimmer-pulse-enabled .futuristic-card {
+      animation: shimmer-anim-pulse 3s infinite ease-in-out;
+      background-image: 
+        radial-gradient(
+          circle at 50% 50%,
+          color-mix(in srgb, var(--card-shimmer-color) var(--shimmer-opacity, 0%), transparent) 0%,
+          transparent 70%
+        ),
+        radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    @property --shimmer-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+    @keyframes shimmer-anim-radar {
+      to { --shimmer-angle: 360deg; }
+    }
+    body.card-shimmer-radar-enabled .futuristic-card {
+      animation: shimmer-anim-radar 5s infinite linear;
+      background-image: 
+        conic-gradient(
+          from var(--shimmer-angle) at 50% 50%,
+          transparent 0deg,
+          color-mix(in srgb, var(--card-shimmer-color) var(--card-shimmer-intensity), transparent) 20deg,
+          transparent 40deg
+        ),
+        radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    @keyframes shimmer-anim-diag {
+      from { background-position: -100% -100%, 0 0; }
+      to { background-position: 100% 100%, 0 0; }
+    }
+    body.card-shimmer-diag-enabled .futuristic-card {
+        background-image: 
+        linear-gradient(
+          -45deg,
+          transparent 40%,
+          color-mix(in srgb, var(--card-shimmer-color) var(--card-shimmer-intensity), transparent) 50%,
+          transparent 60%
+        ),
+        radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.6) 100%);
+        background-size: 300% 300%, 100% 100%;
+        animation: shimmer-anim-diag 3.5s infinite linear;
+    }
+    
+    @keyframes smoke-pulse {
+      0%, 100% {
+        opacity: var(--card-smoke-opacity, 0.7);
+        transform: scale(1.0);
+      }
+      50% {
+        opacity: calc(var(--card-smoke-opacity, 0.7) * 0.85);
+        transform: scale(1.05);
+      }
+    }
+
+    .futuristic-card::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 10%;
+      right: 10%;
+      height: 20px;
+      background: radial-gradient(ellipse at center, color-mix(in srgb, var(--card-glow-color) 35%, transparent) 0%, rgba(0, 0, 0, 0) 70%);
+      filter: blur(8px);
+      z-index: -1;
+      opacity: var(--card-smoke-opacity, 0.7);
+      animation: smoke-pulse 5s ease-in-out infinite;
+    }
+
+    /* Futuristic Form Elements */
+    .futuristic-input {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      color: white;
+      transition: all 0.3s ease;
+    }
+    .futuristic-input:focus {
+      outline: none;
+      border-color: var(--theme-color-primary);
+      box-shadow: 0 0 15px color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+    }
+
+    .futuristic-btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid transparent;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .futuristic-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: color-mix(in srgb, var(--theme-color-primary) 80%, black);
+      border-color: var(--theme-color-primary);
+      color: white;
+      text-shadow: 0 0 5px white;
+    }
+    .btn-primary:hover:not(:disabled) {
+       background-color: var(--theme-color-primary);
+       box-shadow: 0 0 20px var(--theme-color-primary);
+    }
+
+    .btn-danger {
+      background-color: color-mix(in srgb, #ef4444 80%, black);
+      border-color: #ef4444;
+      color: white;
+    }
+     .btn-danger:hover {
+       background-color: #ef4444;
+       box-shadow: 0 0 20px #ef4444;
+    }
+
+    /* Futuristic Range Input */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      border: 3px solid var(--theme-color-primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--theme-color-primary);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      border: 3px solid var(--theme-color-primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--theme-color-primary);
+    }
+
+    /* Text Glow Effect */
+    .text-glow {
+      text-shadow: 0 0 8px color-mix(in srgb, var(--theme-color-primary) 50%, transparent), 
+                   0 0 12px color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+    }
+
+    @keyframes undo-bar-enter {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+    .animate-undo-bar-enter {
+      animation: undo-bar-enter 0.4s ease-out forwards;
+    }
+
+    /* Master Animation Disabler */
+    body.animations-disabled *,
+    body.animations-disabled *:before,
+    body.animations-disabled *:after {
+      animation: none !important;
+      transition: none !important;
+    }
+    
+    /* Granular Animation Disablers */
+    body.loading-animation-disabled .lines-bg *,
+    body.loading-animation-disabled .logo-container * {
+      animation: none !important;
+    }
+    
+    body.background-animations-disabled .stars,
+    body.background-animations-disabled .background-grid,
+    body.background-animations-disabled .lines-bg > div {
+      animation: none !important;
+    }
+
+    body.card-animations-disabled .futuristic-card,
+    body.card-animations-disabled .futuristic-card::before,
+    body.card-animations-disabled .futuristic-card::after {
+      animation-name: none !important;
+    }
+    body.card-animations-disabled .futuristic-card {
+      transition: none !important;
+    }
+
+    body.ui-animations-disabled .animate-futuristic-fade-in,
+    body.ui-animations-disabled .icon-float,
+    body.ui-animations-disabled .animate-undo-bar-enter,
+    body.ui-animations-disabled .summary-arrow,
+    body.ui-animations-disabled .message-bubble {
+      animation: none !important;
+    }
+    
+    body.game-animations-disabled .score-pop,
+    body.game-animations-disabled .feedback-container,
+    body.game-animations-disabled .card-inner,
+    body.game-animations-disabled .breathing-circle {
+        animation: none !important;
+        transition: none !important;
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://aistudiocdn.com/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://aistudiocdn.com/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://aistudiocdn.com/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://aistudiocdn.com/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://aistudiocdn.com/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://aistudiocdn.com/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/compiler": "https://next.esm.sh/@angular/compiler@^20.3.2?external=rxjs",
+    "@angular/common": "https://next.esm.sh/@angular/common@^20.3.2?external=rxjs",
+    "@angular/common/http": "https://next.esm.sh/@angular/common@^20.3.2/http?external=rxjs",
+    "@google/genai": "https://next.esm.sh/@google/genai@^1.21.0?external=rxjs",
+    "@angular/platform-browser": "https://next.esm.sh/@angular/platform-browser@^20.3.2?external=rxjs",
+    "@angular/core": "https://next.esm.sh/@angular/core@^20.3.2?external=rxjs",
+    "@angular/router": "https://next.esm.sh/@angular/router@^20.3.2?external=rxjs",
+    "@angular/forms": "https://next.esm.sh/@angular/forms@^20.3.2?external=rxjs"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-black text-white">
+  <div class="stars stars-1"></div>
+  <div class="stars stars-2"></div>
+  <div class="background-grid"></div>
+  <app-root></app-root>
+</body>
+</html>

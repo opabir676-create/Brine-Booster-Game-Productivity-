@@ -1,0 +1,81 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">AI Idea Generator</h1>
+    <p class="text-gray-400">Unleash creativity with AI-powered brainstorming.</p>
+  </header>
+
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-3" [style.color]="'var(--theme-color-primary)'">Brainstorming Session</h2>
+        <form (submit)="generateIdeas()" class="flex flex-col gap-4">
+          <div>
+            <label for="ideaTopic" class="block text-sm font-medium text-gray-300 mb-2">What's your topic?</label>
+            <textarea 
+              id="ideaTopic"
+              [(ngModel)]="prompt"
+              name="prompt"
+              placeholder="e.g., 'A mobile app for pet owners' or 'unique birthday party themes'..." 
+              class="futuristic-input min-h-[80px] resize-y w-full"></textarea>
+          </div>
+          <div>
+            <label for="ideaCount" class="block text-sm font-medium text-gray-300 mb-2">Number of Ideas: {{ numberOfIdeas() }}</label>
+            <input type="range" id="ideaCount" min="3" max="10" [value]="numberOfIdeas()" (input)="numberOfIdeas.set($event.target.valueAsNumber)">
+          </div>
+          <button type="submit" class="futuristic-btn btn-primary" [disabled]="state() === 'loading' || !prompt().trim()">
+            {{ state() === 'loading' ? 'Generating...' : 'Generate Ideas' }}
+          </button>
+          @if(!isApiKeyValid) {
+            <p class="text-center text-yellow-400 text-sm mt-2">A valid Gemini API key is required.</p>
+          }
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="min-h-[200px]">
+    @switch (state()) {
+      @case ('loading') {
+        <div class="flex flex-col items-center justify-center text-center futuristic-card p-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+          <p class="text-gray-400 mt-4">The AI is brainstorming...</p>
+        </div>
+      }
+      @case ('success') {
+        @if (ideas().length > 0) {
+          <div class="flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-semibold text-glow" [style.color]="'var(--theme-color-primary)'">Here are some ideas!</h2>
+              <button (click)="saveIdeas()" class="futuristic-btn btn-primary !py-2 !px-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1H2V3Z" /><path fill-rule="evenodd" d="M13 13.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5V5h10v8.5ZM5.5 7a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Z" clip-rule="evenodd" /></svg>
+                <span>{{ isSaved() ? 'Saved!' : 'Save All' }}</span>
+              </button>
+            </div>
+            @for (idea of ideas(); track $index) {
+              <div class="futuristic-card p-4">
+                 <div class="card-content">
+                    <div class="relative z-10 flex justify-between items-start gap-4">
+                      <p class="text-gray-200 flex-grow">{{ idea }}</p>
+                      <button (click)="copyIdea(idea, $index)" class="futuristic-btn !py-1 !px-2 text-xs shrink-0">
+                        {{ copiedIndex() === $index ? 'Copied!' : 'Copy' }}
+                      </button>
+                    </div>
+                 </div>
+              </div>
+            }
+          </div>
+        }
+      }
+      @case ('error') {
+        <div class="futuristic-card p-8 text-center bg-red-900/50 border-red-500">
+          <h3 class="text-xl font-bold text-red-300">An Error Occurred</h3>
+          <p class="text-red-200 mt-2">{{ error() }}</p>
+        </div>
+      }
+    }
+  </section>
+</div>

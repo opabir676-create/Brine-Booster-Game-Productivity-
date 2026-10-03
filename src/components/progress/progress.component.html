@@ -1,0 +1,111 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-4xl mx-auto">
+  <header>
+     <a routerLink="/home" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Home
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Your Progress</h1>
+    <p class="text-gray-400">Track your performance and set goals for your mental journey.</p>
+  </header>
+  
+  <!-- Goals Section -->
+  <section class="futuristic-card p-5 animate-futuristic-fade-in">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Your Goals</h2>
+        @if(goals().length > 0) {
+          <div class="flex flex-col gap-4">
+            @for(goal of goals(); track goal.id) {
+              <div class="bg-white/5 p-3 rounded-lg">
+                <div class="flex justify-between items-start gap-2">
+                  <div>
+                    <p class="font-semibold">{{ goal.description }}</p>
+                    <p class="text-xs text-gray-400 capitalize">{{ goal.type }} Goal: {{ goal.progress }} / {{ goal.target }} {{ goal.category === 'pomodoro' ? 'sessions' : 'games' }}</p>
+                  </div>
+                  <button (click)="deleteGoal(goal.id)" class="text-gray-500 hover:text-red-400 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1H2V3Z" /><path fill-rule="evenodd" d="M13 13.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5V5h10v8.5ZM5.5 7a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Zm3 0a.5.5 0 0 0-1 0v5a.5.5 0 0 0 1 0V7Z" clip-rule="evenodd" /></svg>
+                  </button>
+                </div>
+                <div class="w-full bg-black/50 rounded-full h-2.5 mt-2">
+                  <div class="h-2.5 rounded-full" [style.width.%]="(goal.progress / goal.target) * 100" [style.background-color]="'var(--theme-color-primary)'"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+           <p class="text-gray-400 text-center">You haven't set any goals yet. Add one below!</p>
+        }
+        
+        <form [formGroup]="goalForm" (ngSubmit)="addGoal()" class="mt-4 pt-4 border-t border-white/10 flex flex-col gap-4">
+          <h3 class="text-lg font-semibold">Add a New Goal</h3>
+          <input type="text" formControlName="description" placeholder="Goal Description (e.g., Play 10 Logic Games)" class="futuristic-input" required>
+          <div class="grid grid-cols-2 gap-4">
+            <select formControlName="type" class="futuristic-input">
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+            <select formControlName="category" class="futuristic-input">
+              @for(cat of goalCategories; track cat) {
+                <option [value]="cat" class="capitalize">{{ cat === 'pomodoro' ? 'Pomodoro Sessions' : cat + ' Games' }}</option>
+              }
+            </select>
+          </div>
+           <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Target: {{ goalForm.value.target }}</label>
+            <input type="range" formControlName="target" min="1" max="50">
+          </div>
+          <button type="submit" class="futuristic-btn btn-primary">Add Goal</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Game History -->
+  @if (getGameHistoryKeys().length > 0) {
+    <div class="flex flex-col gap-6 animate-futuristic-fade-in">
+      @for(gameId of getGameHistoryKeys(); track gameId) {
+        <section class="futuristic-card p-5">
+          <div class="card-content">
+            <div class="relative z-10">
+              <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">{{ getGameName(gameId) }}</h2>
+              <div class="max-h-60 overflow-y-auto pr-2">
+                <table class="w-full text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-white/10">
+                      <th class="py-2">Date</th>
+                      @if (hasAccuracyData(gameId)) {
+                        <th class="py-2 text-center">Accuracy</th>
+                      }
+                      @if (hasReactionData(gameId)) {
+                        <th class="py-2 text-center">Avg. Speed</th>
+                      }
+                      <th class="py-2 text-right">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for(entry of stats().gameHistory[gameId].slice().reverse(); track $index) {
+                      <tr class="border-b border-white/20 last:border-b-0">
+                        <td class="py-2 text-gray-400">{{ entry.date | date:'short' }}</td>
+                        @if (hasAccuracyData(gameId)) {
+                          <td class="py-2 text-center">{{ entry.accuracy ?? '-' }}</td>
+                        }
+                        @if (hasReactionData(gameId)) {
+                          <td class="py-2 text-center">{{ entry.avgReactionTime ?? '-' }}</td>
+                        }
+                        <td class="py-2 text-right font-semibold">{{ entry.score }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+    </div>
+  } @else {
+    <div class="futuristic-card p-8 text-center animate-futuristic-fade-in">
+      <p class="text-gray-400">No game history yet. Play some games to see your progress here!</p>
+    </div>
+  }
+</div>

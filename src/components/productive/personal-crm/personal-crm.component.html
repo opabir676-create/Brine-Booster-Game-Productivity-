@@ -1,0 +1,90 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-4xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Personal CRM</h1>
+        <p class="text-gray-400">Nurture your personal and professional relationships.</p>
+      </div>
+      <button (click)="showAddForm()" class="futuristic-btn btn-primary flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+        Add Contact
+      </button>
+    </div>
+    <div class="relative mt-4">
+      <input 
+        type="text" 
+        placeholder="Search contacts..." 
+        class="w-full futuristic-input pl-6 pr-12 py-3"
+        [value]="searchQuery()"
+        (input)="searchQuery.set($event.target.value)">
+      <svg class="w-5 h-5 absolute right-5 top-1/2 -translate-y-1/2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+  </header>
+  
+  <!-- Add/Edit Form -->
+  @if(isFormVisible()) {
+    <section class="futuristic-card p-5">
+      <div class="card-content">
+        <form (submit)="$event.preventDefault(); saveContact()" class="relative z-10 space-y-4">
+          <h2 class="text-xl font-semibold" [style.color]="'var(--theme-color-primary)'">{{ isEditing() ? 'Edit Contact' : 'Add New Contact' }}</h2>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Name</label>
+            <input type="text" [(ngModel)]="currentContact().name" name="name" class="futuristic-input w-full" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Notes</label>
+            <textarea [(ngModel)]="currentContact().notes" name="notes" class="futuristic-input w-full min-h-24"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Follow-up Date (Optional)</label>
+            <input type="date" [(ngModel)]="currentContact().followUpDate" name="followUp" class="futuristic-input w-full">
+          </div>
+          <div class="flex gap-2">
+            <button type="button" (click)="hideForm()" class="futuristic-btn flex-1" style="background-color: rgba(255,255,255,0.1)">Cancel</button>
+            <button type="submit" class="futuristic-btn btn-primary flex-1">Save</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  }
+
+  <!-- Contacts List -->
+  <section class="flex flex-col gap-4">
+    @for(contact of filteredContacts(); track contact.id) {
+      <div class="futuristic-card p-4">
+        <div class="card-content">
+          <div class="relative z-10">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-lg">{{ contact.name }}</h3>
+                @if(contact.followUpDate) {
+                  <p class="text-xs font-semibold mt-1 px-2 py-0.5 rounded-full inline-block bg-white/10" [style.color]="'var(--theme-color-primary)'">
+                    Follow-up: {{ contact.followUpDate | date:'mediumDate' }}
+                  </p>
+                }
+              </div>
+              <div class="flex gap-2">
+                <button (click)="showEditForm(contact)" class="p-2 rounded-full hover:bg-white/10"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L3 10.537V13h2.462l7.998-8.002a1.75 1.75 0 0 0 0-2.485Z M2 14.25a.75.75 0 0 0 .75.75h10.5a.75.75 0 0 0 0-1.5H2.75a.75.75 0 0 0-.75.75Z" /></svg></button>
+                <button (click)="deleteContact(contact.id)" class="p-2 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-500/20"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5Z" clip-rule="evenodd" /></svg></button>
+              </div>
+            </div>
+            @if (contact.notes) {
+              <p class="text-gray-300 text-sm mt-2 pt-2 border-t border-white/10 whitespace-pre-wrap">{{ contact.notes }}</p>
+            }
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="futuristic-card p-8 text-center">
+        <p class="text-gray-400">No contacts found. Add one to get started!</p>
+      </div>
+    }
+  </section>
+
+</div>

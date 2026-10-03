@@ -1,0 +1,42 @@
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-6xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Quick Notes</h1>
+        <p class="text-gray-400">Jot down your thoughts on digital sticky notes.</p>
+      </div>
+      <button (click)="addNote()" class="futuristic-btn btn-primary flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" /></svg>
+        Add Note
+      </button>
+    </div>
+  </header>
+
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    @for(note of notes(); track trackById($index, note)) {
+      <div class="futuristic-card p-0 relative" [style.--card-glow-color]="note.color">
+        <button (click)="deleteNote(note.id)" class="absolute top-2 right-2 z-20 p-1.5 rounded-full bg-black/40 text-gray-300 hover:bg-red-500 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M2.22 2.22a.75.75 0 0 1 1.06 0L8 6.94l4.72-4.72a.75.75 0 1 1 1.06 1.06L9.06 8l4.72 4.72a.75.75 0 1 1-1.06 1.06L8 9.06l-4.72 4.72a.75.75 0 0 1-1.06-1.06L6.94 8 2.22 3.28a.75.75 0 0 1 0-1.06Z" /></svg>
+        </button>
+        <div class="card-content">
+          <textarea 
+            class="relative z-10 w-full h-48 bg-transparent futuristic-input !border-none !shadow-none !ring-0 !outline-none text-base p-4 text-black" 
+            placeholder="Start typing..."
+            [style.background-color]="note.color"
+            [value]="note.content"
+            (input)="updateNote(note.id, $event)">
+          </textarea>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-span-full text-center text-gray-500 py-16">
+        <p>No notes yet. Click "Add Note" to create one!</p>
+      </div>
+    }
+  </section>
+
+</div>

@@ -1,0 +1,70 @@
+<style>
+  .game-object {
+    transition-property: left, top, background-color, box-shadow, opacity;
+    transition-timing-function: ease-in-out;
+  }
+</style>
+<div class="flex flex-col items-center gap-6">
+  <header class="w-full flex justify-between items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Score</p>
+      <p class="text-2xl font-bold">{{ score() }}</p>
+    </div>
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-glow" [style.color]="'var(--theme-color-primary)'">
+        @switch (gameState()) {
+          @case ('setup') { Get Ready... }
+          @case ('prepare') { Get Ready... }
+          @case ('watching') { Follow the Target! }
+          @case ('selecting') { Find the Target }
+          @case ('feedback') { 
+            @if(feedback() === 'correct') { Correct! }
+            @else { Incorrect }
+          }
+        }
+      </h2>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Lives</p>
+      <div class="flex justify-center gap-1 mt-1">
+        @for (i of [].constructor(lives()); track $index) {
+          <span class="text-xl" [style.color]="'var(--theme-color-primary)'">♥</span>
+        }
+        @for (i of [].constructor(3 - lives()); track $index) {
+          <span class="text-xl text-gray-600">♥</span>
+        }
+      </div>
+    </div>
+  </header>
+
+  <div class="relative w-full aspect-video bg-black/30 rounded-lg overflow-hidden futuristic-card p-2">
+    @for (obj of objects(); track obj.id) {
+      <div 
+        class="game-object absolute w-8 h-8 rounded-full"
+        [style.transition-duration]="getSpeedInSeconds() + 's'"
+        [style.left]="obj.x + '%'"
+        [style.top]="obj.y + '%'"
+        [style.transform]="'translate(-50%, -50%)'"
+        [class.cursor-pointer]="gameState() === 'selecting'"
+
+        [class.bg-white/40]="(gameState() === 'selecting') || ((gameState() === 'prepare' || gameState() === 'watching') && !obj.isTarget) || (feedback() === 'incorrect' && !obj.isTarget && obj.id !== selectedId())"
+        
+        [class.bg-cyan-400]="(gameState() === 'prepare' || gameState() === 'watching') && obj.isTarget"
+        [class.shadow-[0_0_15px_var(--theme-color-primary)]]="(gameState() === 'prepare' || gameState() === 'watching') && obj.isTarget"
+
+        [class.bg-green-500]="feedback() === 'correct' && obj.isTarget"
+        [class.shadow-[0_0_15px_#22c55e]]="feedback() === 'correct' && obj.isTarget"
+
+        [class.bg-red-500]="feedback() === 'incorrect' && obj.id === selectedId()"
+        [class.shadow-[0_0_15px_#ef4444]]="feedback() === 'incorrect' && obj.id === selectedId()"
+        
+        [class.ring-4]="feedback() === 'incorrect' && obj.isTarget"
+        [class.ring-yellow-400]="feedback() === 'incorrect' && obj.isTarget"
+
+        [class.transition-opacity]="true"
+        [class.opacity-40]="gameState() === 'feedback' && !obj.isTarget && obj.id !== selectedId()"
+        (click)="handleObjectClick(obj)">
+      </div>
+    }
+  </div>
+</div>

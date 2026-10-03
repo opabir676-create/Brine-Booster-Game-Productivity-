@@ -1,0 +1,148 @@
+<style>
+  .score-pop {
+    animation: score-pop-anim 0.4s ease-out;
+  }
+  @keyframes score-pop-anim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); color: #fff; }
+    100% { transform: scale(1); }
+  }
+
+  .feedback-container.correct {
+    animation: correct-pulse-anim 0.5s ease-in-out;
+  }
+  @keyframes correct-pulse-anim {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    50% { box-shadow: 0 0 30px 10px rgba(34, 197, 94, 0.5); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  }
+
+  .feedback-container.incorrect {
+    animation: incorrect-shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+  @keyframes incorrect-shake-anim {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+</style>
+<div class="flex flex-col items-center gap-6">
+  @switch (gameState()) {
+    @case ('setup') {
+      <div class="w-full max-w-lg text-center futuristic-card p-8">
+        <h2 class="text-2xl font-bold text-glow mb-4" [style.color]="'var(--theme-color-primary)'">AI Riddles Setup</h2>
+        <p class="text-gray-400 mb-6">Customize your riddle challenge.</p>
+        <div class="flex flex-col gap-6">
+          <!-- Number of Riddles -->
+          <div>
+            <label for="riddleCount" class="block text-sm font-medium text-gray-300 mb-2">Number of Riddles: {{ numberOfRiddles() }}</label>
+            <input type="range" id="riddleCount" min="1" max="10" [value]="numberOfRiddles()" (input)="numberOfRiddles.set($event.target.valueAsNumber)">
+          </div>
+           <!-- Topic -->
+          <div>
+            <label for="riddleTopic" class="block text-sm font-medium text-gray-300 mb-2">Topic (optional)</label>
+            <div class="flex gap-2">
+                <input 
+                  type="text"
+                  id="riddleTopic"
+                  [ngModel]="topic()"
+                  (ngModelChange)="topic.set($event)"
+                  name="topic"
+                  placeholder="e.g., Animals, Science..."
+                  class="w-full futuristic-input text-center">
+                <button (click)="generateRandomTopic()" [disabled]="isGeneratingTopic()" title="Generate Random Topic" class="futuristic-btn p-3">
+                    @if(isGeneratingTopic()) {
+                        <div class="w-5 h-5 border-b-2 border-white rounded-full animate-spin"></div>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M15.312 5.312a.75.75 0 0 1 0 1.061L12.439 9.25H14.25a.75.75 0 0 1 0 1.5H11.5a.75.75 0 0 1-.75-.75v-2.75a.75.75 0 0 1 1.5 0v1.811l2.872-2.872a.75.75 0 0 1 1.061 0ZM8.5 10.75a.75.75 0 0 1 .75.75v2.75a.75.75 0 0 1-1.5 0v-1.811l-2.872 2.872a.75.75 0 1 1-1.061-1.061L7.561 10.75H5.75a.75.75 0 0 1 0-1.5h2.75a.75.75 0 0 1 .75.75Z" clip-rule="evenodd" /></svg>
+                    }
+                </button>
+            </div>
+          </div>
+          <button (click)="startGame()" class="futuristic-btn btn-primary w-full">Start Challenge</button>
+        </div>
+      </div>
+    }
+    @case ('loading') {
+      <div class="w-full futuristic-card p-8 min-h-[300px] flex flex-col items-center justify-center text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+        <p class="text-gray-400 mt-4">Generating your riddle set...</p>
+      </div>
+    }
+    @case ('playing') {
+       <header class="w-full flex justify-between items-center futuristic-card p-4">
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Score</p>
+          <p class="text-2xl font-bold" [class.score-pop]="scoreUpdated()">{{ score() }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Streak</p>
+          <p class="text-2xl font-bold">🔥 {{ streak() }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Time Left</p>
+          <p class="text-2xl font-bold">{{ timeLeft() }}s</p>
+        </div>
+      </header>
+      <div class="futuristic-card w-full p-8 min-h-[250px] flex flex-col items-center justify-center text-center">
+        <p class="text-xl text-gray-200 leading-relaxed">{{ currentRiddle()?.riddle }}</p>
+      </div>
+      <form (submit)="submitAnswer()" class="w-full flex gap-2">
+        <input 
+          type="text"
+          [ngModel]="userAnswer()"
+          (ngModelChange)="userAnswer.set($event)"
+          name="userAnswer"
+          placeholder="Type your answer here..."
+          class="flex-grow futuristic-input"
+          autocomplete="off">
+        <button type="submit" class="futuristic-btn btn-primary">Submit</button>
+      </form>
+      <div class="w-full flex justify-between items-start gap-2 mt-2">
+        <div class="flex-grow min-h-[44px]">
+          @if(hint()) {
+            <p class="text-sm text-yellow-300 bg-yellow-900/50 p-2 rounded-md text-left animate-futuristic-fade-in">
+              <strong>Hint:</strong> {{ hint() }}
+            </p>
+          }
+        </div>
+        <div class="flex gap-2 shrink-0">
+          <button (click)="getHint()" class="futuristic-btn" [disabled]="hintUsed() || hintLoading()" style="background-color: rgba(255,255,255,0.1)">
+            @if(hintLoading()) {
+              <span class="w-5 h-5 border-b-2 border-white rounded-full inline-block animate-spin"></span>
+            } @else {
+              Hint
+            }
+          </button>
+          <button (click)="skip()" class="futuristic-btn" style="background-color: rgba(255,255,255,0.1)">Skip</button>
+        </div>
+      </div>
+    }
+    @case ('checking') {
+      <div class="w-full futuristic-card p-8 min-h-[250px] flex flex-col items-center justify-center text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+        <p class="text-gray-400 mt-2">Checking your answer...</p>
+      </div>
+    }
+     @case ('correct') {
+      <div class="w-full futuristic-card p-8 min-h-[250px] flex flex-col items-center justify-center text-center feedback-container correct">
+        <span class="text-6xl">✅</span>
+        <p class="text-2xl font-bold text-green-400">Correct!</p>
+      </div>
+    }
+     @case ('incorrect') {
+       <div class="w-full futuristic-card p-8 min-h-[250px] flex flex-col items-center justify-center text-center feedback-container incorrect">
+        <span class="text-6xl">❌</span>
+        <p class="text-2xl font-bold text-red-400">Incorrect</p>
+        <p class="text-gray-400">The answer was: {{ currentRiddle()?.answer }}</p>
+      </div>
+    }
+    @case ('error') {
+      <div class="text-red-400 futuristic-card p-8 text-center">
+        <p class="font-bold text-xl">An Error Occurred</p>
+        <p class="text-sm mt-2">Could not connect to the AI service. Please ensure your API key in Settings is valid or try again later.</p>
+      </div>
+    }
+  }
+</div>

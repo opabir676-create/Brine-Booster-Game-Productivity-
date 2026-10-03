@@ -1,0 +1,89 @@
+<style>
+  .peg {
+    transition: all 0.3s ease-in-out;
+  }
+  .feedback-peg.reveal {
+    transform: scale(1);
+    opacity: 1;
+  }
+</style>
+<div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
+  <!-- Header -->
+  <header class="w-full flex justify-between items-center futuristic-card p-4">
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-glow" [style.color]="'var(--theme-color-primary)'">Code Breaker</h2>
+    </div>
+    <div class.text-center>
+      <p class="text-sm text-gray-400">Guesses Left</p>
+      <p class="text-2xl font-bold">{{ maxGuesses() - activeRow() }}</p>
+    </div>
+  </header>
+
+  <!-- Game Board -->
+  <div class="w-full futuristic-card p-4">
+    <div class="card-content">
+      <div class="relative z-10 space-y-2">
+        @for(guess of guesses(); track $index; let guessIndex = $index) {
+          <div class="flex items-center gap-2 p-1 rounded-lg" [class.bg-white/10]="activeRow() === $index && gameState() === 'playing'">
+            <!-- Pegs for Guesses -->
+            <div class="flex-grow grid gap-2" [style.grid-template-columns]="'repeat(' + codeLength() + ', 1fr)'">
+              @for(color of guess.colors; track $index) {
+                <div class="peg aspect-square rounded-full border-2 border-dashed border-white/20" [style.background-color]="color"></div>
+              }
+            </div>
+            <!-- Pegs for Feedback -->
+            <div class="w-16 grid grid-cols-2 gap-1.5 border-l-2 border-white/10 pl-2">
+              @for(peg of guess.feedback; track $index; let i = $index) {
+                <div 
+                  class="feedback-peg aspect-square rounded-full transition-transform duration-300 transform scale-0 opacity-0"
+                  [class.bg-white]="peg === 'correct'"
+                  [class.ring-1]="peg === 'present'"
+                  [class.ring-white]="peg === 'present'"
+                  [class.bg-transparent]="peg === 'present'"
+                  [class.reveal]="revealFeedback() && activeRow() === guessIndex"
+                  [style.transition-delay]="(i * 50) + 'ms'">
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  @if (gameState() === 'won' || gameState() === 'lost') {
+    <div class="w-full futuristic-card p-6 text-center">
+        @if (gameState() === 'won') {
+            <p class="text-2xl font-bold text-green-400">🎉 Code Cracked! 🎉</p>
+        } @else {
+            <p class="text-2xl font-bold text-red-400">You Lost!</p>
+            <p class="text-gray-400">The secret code was:</p>
+            <div class="flex justify-center gap-2 mt-2">
+              @for(color of state.secretCode(); track $index) {
+                <div class="w-8 h-8 rounded-full" [style.background-color]="color"></div>
+              }
+            </div>
+        }
+    </div>
+  }
+
+  <!-- Controls -->
+  @if (gameState() === 'playing') {
+    <div class="w-full futuristic-card p-4">
+      <div class="card-content">
+        <div class="relative z-10">
+          <div class="grid grid-cols-4 gap-2 mb-4">
+            @for(color of availableColors(); track color) {
+              <button (click)="selectColor(color)" class="peg aspect-square rounded-full" [style.background-color]="color"></button>
+            }
+          </div>
+          <div class="flex gap-2">
+            <button (click)="deleteLastColor()" class="futuristic-btn flex-1" style="background-color: rgba(255,255,255,0.1)">Delete</button>
+            <button (click)="submitGuess()" class="futuristic-btn btn-primary flex-1" [disabled]="guesses()[activeRow()].colors.includes(null)">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

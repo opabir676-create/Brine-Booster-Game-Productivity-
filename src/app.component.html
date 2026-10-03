@@ -1,0 +1,14 @@
+
+@if (isLoading()) {
+  <app-loader />
+} @else {
+  <div class="relative z-10">
+    <main class="min-h-screen" [class.pb-24]="!isChatRoute()" [class.pt-4]="!isChatRoute()" [class.px-4]="!isChatRoute()">
+      <router-outlet />
+    </main>
+    <app-bottom-nav [isVisible]="isNavVisible()" />
+    @if(modalService.apiKeyModalVisible()) {
+      <app-api-key-modal />
+    }
+  </div>
+}

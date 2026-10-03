@@ -1,0 +1,45 @@
+<style>
+  .breathing-circle {
+    transition: transform 4s ease-in-out;
+  }
+  .state-in { transform: scale(1.5); }
+  .state-out { transform: scale(0.5); }
+  .state-hold1, .state-hold2 { transform: scale(1); }
+  .state-stopped { transform: scale(1); }
+</style>
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Breathing Exercise</h1>
+    <p class="text-gray-400">Follow the guide to calm your mind and body.</p>
+  </header>
+
+  <section class="futuristic-card p-5 flex flex-col items-center justify-center min-h-[50vh]">
+    <div class="card-content">
+      <div class="relative z-10 flex flex-col items-center justify-center gap-8">
+        <div class="w-64 h-64 rounded-full flex items-center justify-center"
+             style="background: radial-gradient(circle, color-mix(in srgb, var(--theme-color-primary) 10%, transparent) 0%, transparent 70%);">
+          <div 
+            class="breathing-circle w-24 h-24 rounded-full"
+            [class.state-in]="state() === 'in'"
+            [class.state-out]="state() === 'out'"
+            [class.state-hold1]="state() === 'hold1'"
+            [class.state-hold2]="state() === 'hold2'"
+            [class.state-stopped]="state() === 'stopped'"
+            [style.background-color]="'var(--theme-color-primary)'"
+            [style.box-shadow]="'0 0 40px var(--theme-color-primary)'">
+          </div>
+        </div>
+
+        <p class="text-2xl font-semibold text-white h-8">{{ getInstruction() }}</p>
+
+        <button (click)="toggleExercise()" class="futuristic-btn btn-primary w-40 text-xl py-3">
+          {{ state() === 'stopped' ? 'Start' : 'Stop' }}
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,92 @@
+<div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
+  @switch (gameState()) {
+    @case ('setup') {
+      <div class="w-full text-center futuristic-card p-8">
+        <h2 class="text-2xl font-bold text-glow mb-4" [style.color]="'var(--theme-color-primary)'">Two Truths, One Lie</h2>
+        <p class="text-gray-400 mb-6">Enter any topic, and the AI will try to fool you.</p>
+        <div class="flex flex-col gap-6">
+           <div>
+            <label for="setCount" class="block text-sm font-medium text-gray-300 mb-2">Number of Sets: {{ numberOfSets() }}</label>
+            <input type="range" id="setCount" min="1" max="10" [value]="numberOfSets()" (input)="numberOfSets.set($event.target.valueAsNumber)">
+          </div>
+          <div>
+             <label for="gameTopic" class="block text-sm font-medium text-gray-300 mb-2">Topic</label>
+            <div class="flex gap-2">
+                <input 
+                  type="text"
+                  id="gameTopic"
+                  [ngModel]="topic()"
+                  (ngModelChange)="topic.set($event)"
+                  name="topic"
+                  placeholder="e.g., Ancient Rome..."
+                  class="w-full futuristic-input text-center">
+                <button (click)="generateRandomTopic()" [disabled]="isGeneratingTopic()" title="Generate Random Topic" class="futuristic-btn p-3">
+                    @if(isGeneratingTopic()) {
+                        <div class="w-5 h-5 border-b-2 border-white rounded-full animate-spin"></div>
+                    } @else {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M15.312 5.312a.75.75 0 0 1 0 1.061L12.439 9.25H14.25a.75.75 0 0 1 0 1.5H11.5a.75.75 0 0 1-.75-.75v-2.75a.75.75 0 0 1 1.5 0v1.811l2.872-2.872a.75.75 0 0 1 1.061 0ZM8.5 10.75a.75.75 0 0 1 .75.75v2.75a.75.75 0 0 1-1.5 0v-1.811l-2.872 2.872a.75.75 0 1 1-1.061-1.061L7.561 10.75H5.75a.75.75 0 0 1 0-1.5h2.75a.75.75 0 0 1 .75.75Z" clip-rule="evenodd" /></svg>
+                    }
+                </button>
+            </div>
+          </div>
+          <button (click)="startGame()" class="futuristic-btn btn-primary" [disabled]="!topic().trim()">Start Game</button>
+        </div>
+      </div>
+    }
+    @case ('loading') {
+      <div class="w-full futuristic-card p-8 min-h-[300px] flex flex-col items-center justify-center text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+        <p class="text-gray-400 mt-4">AI is crafting statements about "{{topic()}}"...</p>
+      </div>
+    }
+    @case ('error') {
+       <div class="text-red-400 futuristic-card p-8 text-center min-h-[300px] flex flex-col items-center justify-center">
+        <p class="font-bold text-xl">An Error Occurred</p>
+        <p class="text-sm mt-2">Could not generate statements. Please ensure your API key is valid or try a different topic.</p>
+      </div>
+    }
+    @case ('playing') {
+       <!-- Header -->
+      <header class="w-full grid grid-cols-2 items-center futuristic-card p-4">
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Score</p>
+          <p class="text-2xl font-bold">{{ score() }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Answered</p>
+          <p class="text-xl font-bold">{{ correctAnswers() + incorrectAnswers() }} / {{ numberOfSets() }}</p>
+        </div>
+      </header>
+
+      <div class="w-full text-center">
+        <h2 class="text-xl font-semibold mb-2 text-glow" [style.color]="'var(--theme-color-primary)'">Find the Lie in Each Set</h2>
+        <p class="text-gray-400">Topic: {{ topic() }}</p>
+      </div>
+      
+      <div class="w-full flex flex-col gap-6">
+        @for(set of statementSets(); track $index; let setIndex = $index) {
+          <div class="futuristic-card p-4">
+            <div class="card-content">
+              <div class="relative z-10 space-y-3">
+                @for(statement of set.statements; track $index) {
+                  <button 
+                    (click)="selectAnswer(setIndex, statement)" 
+                    class="futuristic-btn text-left p-3 h-full text-sm w-full transition-all"
+                    [disabled]="set.selected !== null"
+                    [class.bg-green-500/30]="set.selected !== null && statement.is_lie"
+                    [class.border-green-400]="set.selected !== null && statement.is_lie"
+                    [class.bg-red-500/30]="set.selected !== null && !statement.is_lie && statement.statement === set.selected?.statement"
+                    [class.border-red-400]="set.selected !== null && !statement.is_lie && statement.statement === set.selected?.statement"
+                    [class.opacity-60]="set.selected !== null && statement.statement !== set.selected?.statement && !statement.is_lie"
+                    >
+                    {{ statement.statement }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

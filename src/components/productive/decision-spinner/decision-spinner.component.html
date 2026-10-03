@@ -1,0 +1,91 @@
+<style>
+  .spinner-container {
+    transition: transform 6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .spinner-text {
+    font-size: 6px;
+    font-weight: bold;
+    fill: white;
+    text-anchor: middle;
+  }
+</style>
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+     <a routerLink="/productive" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+        Back to Tools
+      </a>
+    <h1 class="text-3xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">Decision Spinner</h1>
+    <p class="text-gray-400">Can't decide? Let the wheel choose for you!</p>
+  </header>
+
+  <!-- Spinner and Result -->
+  <section class="futuristic-card p-5 flex flex-col items-center">
+    <div class="card-content">
+      <div class="relative z-10 w-80 h-80 flex flex-col items-center">
+        <!-- Pointer -->
+        <div class="absolute -top-2 left-1/2 -translate-x-1/2 z-10" style="filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
+          <svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0L23.2583 18L0.74167 18L12 0Z" [attr.fill]="'var(--theme-color-primary)'"/>
+            <path d="M12 36L0.74167 18L23.2583 18L12 36Z" fill="#000" fill-opacity="0.3"/>
+          </svg>
+        </div>
+        
+        <!-- Spinner -->
+        <div class="w-full h-full spinner-container" [style.transform]="'rotate(' + rotation() + 'deg)'">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            @for(slice of wheelSlices(); track slice.option) {
+              <path [attr.d]="slice.path" [attr.fill]="slice.color"></path>
+              <text [attr.transform]="slice.textTransform" x="50" y="15" class="spinner-text">{{ slice.option }}</text>
+            }
+          </svg>
+        </div>
+        
+        <!-- Center Button -->
+        <button 
+          (click)="spin()"
+          [disabled]="isSpinning() || options().length < 2"
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gray-800 border-4 border-gray-700 futuristic-btn text-lg font-bold">
+          SPIN
+        </button>
+      </div>
+
+      @if (result()) {
+        <div class="mt-4 p-4 bg-black/40 rounded-lg text-center animate-futuristic-fade-in">
+          <p class="text-gray-400">The wheel has chosen:</p>
+          <p class="text-2xl font-bold text-glow" [style.color]="'var(--theme-color-primary)'">{{ result() }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Options Management -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-3" [style.color]="'var(--theme-color-primary)'">Manage Options</h2>
+        <form (submit)="$event.preventDefault(); addOption()" class="flex gap-2 mb-4">
+          <input 
+            type="text" 
+            [(ngModel)]="newOption"
+            name="newOption"
+            placeholder="Add a new option..." 
+            class="flex-grow futuristic-input">
+          <button type="submit" class="futuristic-btn btn-primary">Add</button>
+        </form>
+        
+        <div class="flex flex-wrap gap-2">
+          @for(option of options(); track option) {
+            <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full text-sm">
+              <span>{{ option }}</span>
+              <button (click)="removeOption(option)" class="text-gray-500 hover:text-red-400">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M2.22 2.22a.75.75 0 0 1 1.06 0L8 6.94l4.72-4.72a.75.75 0 1 1 1.06 1.06L9.06 8l4.72 4.72a.75.75 0 1 1-1.06 1.06L8 9.06l-4.72 4.72a.75.75 0 0 1-1.06-1.06L6.94 8 2.22 3.28a.75.75 0 0 1 0-1.06Z" /></svg>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

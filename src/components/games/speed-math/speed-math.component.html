@@ -1,0 +1,37 @@
+<div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
+  <!-- Header -->
+  <header class="w-full grid grid-cols-2 items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Score</p>
+      <p class="text-2xl font-bold">{{ score() }}</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Time Left</p>
+      <p class="text-2xl font-bold">{{ timeLeft() }}s</p>
+    </div>
+  </header>
+  
+  <!-- Game Area -->
+  <div class="w-full futuristic-card p-8 text-center min-h-[200px] flex flex-col justify-center">
+    @if(gameState() === 'playing' && currentProblem(); as problem) {
+      <p class="text-6xl font-bold font-mono tracking-wider text-glow" [style.color]="'var(--theme-color-primary)'">{{ problem.problem }}</p>
+      <p class="text-gray-400 mt-2 text-2xl font-mono">=</p>
+    } @else {
+      <p class="text-2xl font-bold text-gray-400">Game Over!</p>
+    }
+  </div>
+
+  <!-- Input Form -->
+   @if (gameState() === 'playing') {
+    <form (submit)="$event.preventDefault(); submitAnswer()" class="w-full">
+      <input 
+        #answerInput
+        type="number"
+        [(ngModel)]="userAnswer"
+        name="userAnswer"
+        placeholder="?"
+        class="w-full futuristic-input text-4xl text-center font-bold"
+        autocomplete="off">
+    </form>
+  }
+</div>

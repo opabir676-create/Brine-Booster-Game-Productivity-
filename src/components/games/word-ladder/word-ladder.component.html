@@ -1,0 +1,50 @@
+<div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
+  @if (gameState() === 'playing' && puzzles().length > 0) {
+    @if (puzzles()[currentPuzzleIndex()]; as puzzle) {
+      <!-- Header -->
+      <header class="w-full grid grid-cols-3 items-center futuristic-card p-4">
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Score</p>
+          <p class="text-2xl font-bold">{{ score() }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Puzzle</p>
+          <p class="text-2xl font-bold">{{ currentPuzzleIndex() + 1 }} / {{ puzzles().length }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-gray-400">Time</p>
+          <p class="text-2xl font-bold">{{ timer() }}s</p>
+        </div>
+      </header>
+
+      <div class="w-full futuristic-card p-8 text-center">
+        <h2 class="text-xl font-bold mb-4 text-glow" [style.color]="'var(--theme-color-primary)'">Change one letter at a time</h2>
+        <div class="flex flex-col items-center gap-2">
+           @for(rung of puzzle.path; track $index) {
+             @if (rung) {
+               <div class="w-48 h-12 flex items-center justify-center bg-white/10 rounded-md text-2xl font-bold tracking-widest">
+                 {{ rung }}
+               </div>
+             } @else {
+               <input 
+                 type="text"
+                 [ngModel]="userGuesses()[$index] || ''"
+                 (ngModelChange)="updateGuess($index, $event)"
+                 [maxLength]="puzzle.start.length"
+                 class="w-48 h-12 futuristic-input text-center text-2xl font-bold tracking-widest uppercase"
+                 autocomplete="off"
+               >
+             }
+           }
+        </div>
+      </div>
+
+      <button (click)="submitGuesses()" class="futuristic-btn btn-primary w-full">Check Answer</button>
+    }
+  } @else if (gameState() === 'finished') {
+    <div class="w-full futuristic-card p-8 text-center">
+        <h2 class="text-3xl font-bold text-green-400">Puzzles Complete!</h2>
+        <p class="text-lg text-gray-300 mt-2">You solved all the word ladders.</p>
+    </div>
+  }
+</div>

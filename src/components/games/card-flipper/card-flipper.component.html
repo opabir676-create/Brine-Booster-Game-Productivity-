@@ -1,0 +1,105 @@
+<style>
+  .card-container {
+    perspective: 1000px;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+  .card-container.is-flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 0.5rem;
+  }
+  .card-back {
+    background-color: color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+    border: 2px solid var(--theme-color-primary);
+  }
+  .card-front {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotateY(180deg);
+  }
+  .card-matched {
+    opacity: 0.5;
+    background-color: color-mix(in srgb, var(--theme-color-primary) 50%, transparent);
+  }
+
+  /* Animations */
+  @keyframes card-match-glow-anim {
+    0%, 100% { box-shadow: 0 0 10px transparent; }
+    50% { box-shadow: 0 0 30px var(--theme-color-primary), inset 0 0 15px color-mix(in srgb, var(--theme-color-primary) 50%, transparent); }
+  }
+  .card-match-glow {
+    animation: card-match-glow-anim 0.8s ease-in-out;
+  }
+
+  @keyframes card-match-pulse-anim {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  .card-match-pulse {
+    animation: card-match-pulse-anim 0.6s ease-in-out;
+  }
+  
+  @keyframes card-nomatch-shake-anim {
+    10%, 90% { transform: translate3d(-2px, 0, 0) rotateY(180deg); }
+    20%, 80% { transform: translate3d(3px, 0, 0) rotateY(180deg); }
+    30%, 50%, 70% { transform: translate3d(-5px, 0, 0) rotateY(180deg); }
+    40%, 60% { transform: translate3d(5px, 0, 0) rotateY(180deg); }
+  }
+  .card-nomatch-shake .card-inner {
+    animation: card-nomatch-shake-anim 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+</style>
+<div class="flex flex-col items-center gap-6">
+  <!-- Header -->
+  <header class="w-full grid grid-cols-2 items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Moves</p>
+      <p class="text-2xl font-bold">{{ moves() }}</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Time</p>
+      <p class="text-2xl font-bold">{{ timer() }}s</p>
+    </div>
+  </header>
+  
+  <!-- Game Board -->
+  <div class="w-full max-w-lg mx-auto">
+    <div 
+      class="grid gap-3"
+      [style.grid-template-columns]="getGridCols()">
+      @for (card of cards(); track card.id) {
+        <div class="card-container aspect-square" 
+             [class.cursor-pointer]="card.state === 'down' && state.flippedCards().length < 2"
+             [class.is-flipped]="card.state !== 'down'"
+             [class.card-match-pulse]="settingsService.cardMatchAnimationOn() && settingsService.cardMatchAnimationType() === 'pulse' && state.justMatchedIds().includes(card.id)"
+             [class.card-nomatch-shake]="settingsService.cardMatchAnimationOn() && state.noMatchIds().includes(card.id)"
+             (click)="flipCard(card)">
+          <div class="card-inner" [style.transition]="settingsService.cardFlipAnimationOn() ? 'transform ' + settingsService.cardFlipAnimationSpeed() + 's' : 'none'">
+            <div class="card-face card-back flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-8 h-8 text-cyan-200">
+                    <path fill-rule="evenodd" d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm-2.75 6.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.25 10a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm2.25.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM11.25 12a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div 
+              class="card-face card-front flex items-center justify-center"
+              [class.card-matched]="card.state === 'matched'"
+              [class.card-match-glow]="settingsService.cardMatchAnimationOn() && settingsService.cardMatchAnimationType() === 'glow' && state.justMatchedIds().includes(card.id)">
+              <span class="text-4xl">{{ card.symbol }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,31 @@
+<div class="flex flex-col items-center gap-6">
+  <header class="w-full flex justify-between items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Score</p>
+      <p class="text-2xl font-bold">{{ score() }}</p>
+    </div>
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-glow" [style.color]="'var(--theme-color-primary)'">
+        Find the Odd One Out
+      </h2>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Time Left</p>
+      <p class="text-2xl font-bold">{{ timeLeft() }}s</p>
+    </div>
+  </header>
+
+  <div 
+    class="grid gap-4"
+    [style.grid-template-columns]="'repeat(' + gridSize() + ', 1fr)'">
+    @for (shape of shapes(); track shape.id) {
+      <div 
+        class="aspect-square bg-white/5 rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center p-4 hover:bg-white/10"
+        (click)="handleShapeClick(shape)">
+         <svg viewBox="0 0 20 20" class="w-full h-full">
+           <rect x="2" y="2" width="16" height="16" [attr.fill]="shape.color" class="rounded"/>
+         </svg>
+      </div>
+    }
+  </div>
+</div>

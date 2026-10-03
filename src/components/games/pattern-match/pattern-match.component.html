@@ -1,0 +1,64 @@
+<div class="flex flex-col items-center gap-6">
+  <header class="w-full flex justify-between items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Score</p>
+      <p class="text-2xl font-bold">{{ score() }}</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Round</p>
+      <p class="text-2xl font-bold">{{ round() }}</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Time</p>
+      <p class="text-2xl font-bold">{{ timeLeft() }}s</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Lives</p>
+      <div class="flex justify-center gap-1 mt-1">
+        @for (i of [].constructor(lives()); track i) {
+          <span class="text-xl" [style.color]="'var(--theme-color-primary)'">♥</span>
+        }
+        @for (i of [].constructor(3 - lives()); track i) {
+          <span class="text-xl text-gray-600">♥</span>
+        }
+      </div>
+    </div>
+  </header>
+  
+  <!-- Target Pattern -->
+  <div class="flex flex-col items-center gap-2">
+    <h2 class="text-lg font-semibold text-glow" [style.color]="'var(--theme-color-primary)'">Match This Pattern</h2>
+    <p class="text-sm text-gray-400 mt-0 text-center">Find the identical pattern in the grid below.</p>
+    @if(targetPattern(); as pattern) {
+        <div class="grid grid-cols-2 gap-1 p-1 bg-white/10 rounded-md mt-2">
+            @for(cell of pattern.cells; track $index) {
+                <div class="w-8 h-8 rounded-sm" [style.background-color]="cell"></div>
+            }
+        </div>
+    }
+  </div>
+
+  <!-- Game Grid -->
+  <div 
+    class="grid gap-3 w-full max-w-lg mx-auto"
+    [style.grid-template-columns]="getGridCols()">
+    @for(item of grid(); track item.id) {
+      <button 
+        class="aspect-square rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center p-2 futuristic-card no-hover-transform"
+        [class.border-green-400]="feedback() === 'correct' && item.isTarget"
+        [class.border-red-400]="feedback() === 'incorrect' && !item.isTarget"
+        [class.border-2]="feedback() !== ''"
+        (click)="handleSelection(item)"
+        [disabled]="gameState() !== 'playing'">
+         <div class="card-content">
+           <div class="relative z-10 grid grid-cols-2 gap-1">
+              @for(cell of item.pattern.cells; track $index) {
+                  <div class="w-full aspect-square rounded-sm" [style.background-color]="cell"></div>
+              }
+          </div>
+         </div>
+      </button>
+    }
+  </div>
+
+</div>

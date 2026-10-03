@@ -1,0 +1,147 @@
+<div class="fixed inset-0 bg-black flex flex-col items-center justify-center z-50 overflow-hidden">
+  <div class="lines-bg">
+    <!-- Static grid lines -->
+    <div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div>
+    <div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div><div class="line-h"></div>
+
+    <!-- Increased number of sparks for a denser "digital storm" effect -->
+    <div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div><div class="spark-down"></div>
+    <div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div><div class="spark-up"></div>
+    <div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div><div class="spark-right"></div>
+    <div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div><div class="spark-left"></div>
+  </div>
+
+  <style>
+    .lines-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    /* Static Grid Lines */
+    .line {
+      position: absolute;
+      width: 1px;
+      height: 100%;
+      background: color-mix(in srgb, var(--theme-color-primary) 15%, transparent);
+      opacity: 0.2;
+    }
+    .line:nth-child(1) { left: 10%; } .line:nth-child(2) { left: 20%; } .line:nth-child(3) { left: 30%; }
+    .line:nth-child(4) { left: 40%; } .line:nth-child(5) { left: 50%; } .line:nth-child(6) { left: 60%; }
+    .line:nth-child(7) { left: 70%; } .line:nth-child(8) { left: 80%; } .line:nth-child(9) { left: 90%; }
+    .line:nth-child(10) { left: 5%; }
+    
+    .line-h {
+        position: absolute;
+        width: 100%;
+        height: 1px;
+        background: color-mix(in srgb, var(--theme-color-primary) 10%, transparent);
+        opacity: 0.15;
+    }
+    .line-h:nth-child(1) { top: 10%; } .line-h:nth-child(2) { top: 20%; } .line-h:nth-child(3) { top: 30%; }
+    .line-h:nth-child(4) { top: 40%; } .line-h:nth-child(5) { top: 50%; } .line-h:nth-child(6) { top: 60%; }
+    .line-h:nth-child(7) { top: 70%; } .line-h:nth-child(8) { top: 80%; } .line-h:nth-child(9) { top: 90%; }
+    .line-h:nth-child(10) { top: 5%; }
+
+    /* Keyframes for spark movement */
+    @keyframes drop { from { transform: translateY(-10vh); } to { transform: translateY(110vh); } }
+    @keyframes rise { from { transform: translateY(110vh); } to { transform: translateY(-10vh); } }
+    @keyframes slide-right { from { transform: translateX(-10vw); } to { transform: translateX(110vw); } }
+    @keyframes slide-left { from { transform: translateX(110vw); } to { transform: translateX(-10vw); } }
+
+    /* Sparks moving DOWN */
+    .spark-down { position: absolute; width: 1.5px; height: 50px; background: linear-gradient(to bottom, transparent 0%, var(--theme-color-primary) 50%, transparent 100%); filter: drop-shadow(0 0 5px var(--theme-color-primary)); animation: drop 7s linear infinite; }
+    .spark-down:nth-child(1) { left: 10%; animation-delay: -1s; animation-duration: 7s; } .spark-down:nth-child(2) { left: 20%; animation-delay: -4s; animation-duration: 8s; } .spark-down:nth-child(3) { left: 30%; animation-delay: -6s; animation-duration: 6s; opacity: 0.8; } .spark-down:nth-child(4) { left: 40%; animation-delay: -2s; animation-duration: 9s; } .spark-down:nth-child(5) { left: 50%; animation-delay: -5s; animation-duration: 7s; opacity: 0.9; } .spark-down:nth-child(6) { left: 60%; animation-delay: -3s; animation-duration: 8s; } .spark-down:nth-child(7) { left: 70%; animation-delay: -1.5s; animation-duration: 6s; opacity: 1; } .spark-down:nth-child(8) { left: 80%; animation-delay: -5.5s; animation-duration: 9s; } .spark-down:nth-child(9) { left: 90%; animation-delay: -0.5s; animation-duration: 7s; } .spark-down:nth-child(10) { left: 5%; animation-delay: -3.5s; animation-duration: 8s; opacity: 0.7; } .spark-down:nth-child(11) { left: 25%; animation-delay: -7s; animation-duration: 6s; } .spark-down:nth-child(12) { left: 75%; animation-delay: -2.5s; animation-duration: 8s; } .spark-down:nth-child(13) { left: 15%; animation-delay: -8s; animation-duration: 9s; opacity: 0.8; } .spark-down:nth-child(14) { left: 35%; animation-delay: -9s; animation-duration: 7s; } .spark-down:nth-child(15) { left: 55%; animation-delay: -10s; animation-duration: 8s; }
+    .spark-down:nth-child(16) { left: 12%; animation-delay: -11s; animation-duration: 9s; } .spark-down:nth-child(17) { left: 22%; animation-delay: -14s; animation-duration: 7s; } .spark-down:nth-child(18) { left: 32%; animation-delay: -16s; animation-duration: 8s; opacity: 0.8; } .spark-down:nth-child(19) { left: 42%; animation-delay: -12s; animation-duration: 6s; } .spark-down:nth-child(20) { left: 52%; animation-delay: -15s; animation-duration: 9s; opacity: 0.9; } .spark-down:nth-child(21) { left: 62%; animation-delay: -13s; animation-duration: 7s; } .spark-down:nth-child(22) { left: 72%; animation-delay: -11.5s; animation-duration: 8s; opacity: 1; } .spark-down:nth-child(23) { left: 82%; animation-delay: -15.5s; animation-duration: 6s; } .spark-down:nth-child(24) { left: 92%; animation-delay: -10.5s; animation-duration: 9s; } .spark-down:nth-child(25) { left: 8%; animation-delay: -13.5s; animation-duration: 7s; opacity: 0.7; } .spark-down:nth-child(26) { left: 28%; animation-delay: -17s; animation-duration: 8s; } .spark-down:nth-child(27) { left: 78%; animation-delay: -12.5s; animation-duration: 6s; } .spark-down:nth-child(28) { left: 18%; animation-delay: -18s; animation-duration: 9s; opacity: 0.8; } .spark-down:nth-child(29) { left: 38%; animation-delay: -19s; animation-duration: 7s; } .spark-down:nth-child(30) { left: 58%; animation-delay: -20s; animation-duration: 8s; }
+
+    /* Sparks moving UP */
+    .spark-up { position: absolute; width: 1px; height: 70px; background: linear-gradient(to top, transparent 0%, var(--theme-color-primary) 50%, transparent 100%); filter: drop-shadow(0 0 4px var(--theme-color-primary)); animation: rise 8s linear infinite; }
+    .spark-up:nth-child(1) { left: 12%; animation-delay: -2s; animation-duration: 8s; } .spark-up:nth-child(2) { left: 22%; animation-delay: -5s; animation-duration: 9s; } .spark-up:nth-child(3) { left: 32%; animation-delay: -7s; animation-duration: 7s; } .spark-up:nth-child(4) { left: 42%; animation-delay: -3s; animation-duration: 10s; opacity: 0.8; } .spark-up:nth-child(5) { left: 52%; animation-delay: -6s; animation-duration: 8s; } .spark-up:nth-child(6) { left: 62%; animation-delay: -4s; animation-duration: 9s; } .spark-up:nth-child(7) { left: 72%; animation-delay: -2.5s; animation-duration: 7s; opacity: 1; } .spark-up:nth-child(8) { left: 82%; animation-delay: -6.5s; animation-duration: 10s; } .spark-up:nth-child(9) { left: 92%; animation-delay: -1.5s; animation-duration: 8s; } .spark-up:nth-child(10) { left: 8%; animation-delay: -4.5s; animation-duration: 9s; } .spark-up:nth-child(11) { left: 18%; animation-delay: -8s; animation-duration: 7s; opacity: 0.7; } .spark-up:nth-child(12) { left: 28%; animation-delay: -3.5s; animation-duration: 9s; } .spark-up:nth-child(13) { left: 78%; animation-delay: -9s; animation-duration: 8s; } .spark-up:nth-child(14) { left: 88%; animation-delay: -0.5s; animation-duration: 10s; opacity: 0.9; } .spark-up:nth-child(15) { left: 98%; animation-delay: -5.5s; animation-duration: 8s; }
+    .spark-up:nth-child(16) { left: 14%; animation-delay: -12s; animation-duration: 7s; } .spark-up:nth-child(17) { left: 24%; animation-delay: -15s; animation-duration: 8s; } .spark-up:nth-child(18) { left: 34%; animation-delay: -17s; animation-duration: 9s; } .spark-up:nth-child(19) { left: 44%; animation-delay: -13s; animation-duration: 7s; opacity: 0.8; } .spark-up:nth-child(20) { left: 54%; animation-delay: -16s; animation-duration: 10s; } .spark-up:nth-child(21) { left: 64%; animation-delay: -14s; animation-duration: 8s; } .spark-up:nth-child(22) { left: 74%; animation-delay: -12.5s; animation-duration: 9s; opacity: 1; } .spark-up:nth-child(23) { left: 84%; animation-delay: -16.5s; animation-duration: 7s; } .spark-up:nth-child(24) { left: 94%; animation-delay: -11.5s; animation-duration: 10s; } .spark-up:nth-child(25) { left: 6%; animation-delay: -14.5s; animation-duration: 8s; } .spark-up:nth-child(26) { left: 16%; animation-delay: -18s; animation-duration: 9s; opacity: 0.7; } .spark-up:nth-child(27) { left: 26%; animation-delay: -13.5s; animation-duration: 7s; } .spark-up:nth-child(28) { left: 76%; animation-delay: -19s; animation-duration: 10s; } .spark-up:nth-child(29) { left: 86%; animation-delay: -10.5s; animation-duration: 8s; opacity: 0.9; } .spark-up:nth-child(30) { left: 96%; animation-delay: -15.5s; animation-duration: 9s; }
+
+    /* Sparks moving RIGHT */
+    .spark-right { position: absolute; width: 60px; height: 1.5px; background: linear-gradient(to right, transparent 0%, var(--theme-color-primary) 50%, transparent 100%); filter: drop-shadow(0 0 5px var(--theme-color-primary)); animation: slide-right 8s linear infinite; }
+    .spark-right:nth-child(1) { top: 10%; animation-delay: -2s; animation-duration: 8s; } .spark-right:nth-child(2) { top: 20%; animation-delay: -5s; animation-duration: 9s; opacity: 0.8; } .spark-right:nth-child(3) { top: 30%; animation-delay: -7s; animation-duration: 7s; } .spark-right:nth-child(4) { top: 40%; animation-delay: -3s; animation-duration: 10s; } .spark-right:nth-child(5) { top: 50%; animation-delay: -6s; animation-duration: 8s; opacity: 0.9; } .spark-right:nth-child(6) { top: 60%; animation-delay: -4s; animation-duration: 9s; } .spark-right:nth-child(7) { top: 70%; animation-delay: -2.5s; animation-duration: 7s; opacity: 1; } .spark-right:nth-child(8) { top: 80%; animation-delay: -6.5s; animation-duration: 10s; } .spark-right:nth-child(9) { top: 90%; animation-delay: -1.5s; animation-duration: 8s; } .spark-right:nth-child(10) { top: 5%; animation-delay: -4.5s; animation-duration: 9s; opacity: 0.7; } .spark-right:nth-child(11) { top: 15%; animation-delay: -8s; animation-duration: 7s; } .spark-right:nth-child(12) { top: 25%; animation-delay: -3.5s; animation-duration: 9s; opacity: 0.8; } .spark-right:nth-child(13) { top: 75%; animation-delay: -9s; animation-duration: 8s; } .spark-right:nth-child(14) { top: 85%; animation-delay: -0.5s; animation-duration: 10s; opacity: 1; } .spark-right:nth-child(15) { top: 95%; animation-delay: -5.5s; animation-duration: 8s; }
+    .spark-right:nth-child(16) { top: 12%; animation-delay: -12s; animation-duration: 9s; } .spark-right:nth-child(17) { top: 22%; animation-delay: -15s; animation-duration: 7s; opacity: 0.8; } .spark-right:nth-child(18) { top: 32%; animation-delay: -17s; animation-duration: 8s; } .spark-right:nth-child(19) { top: 42%; animation-delay: -13s; animation-duration: 10s; } .spark-right:nth-child(20) { top: 52%; animation-delay: -16s; animation-duration: 7s; opacity: 0.9; } .spark-right:nth-child(21) { top: 62%; animation-delay: -14s; animation-duration: 9s; } .spark-right:nth-child(22) { top: 72%; animation-delay: -12.5s; animation-duration: 8s; opacity: 1; } .spark-right:nth-child(23) { top: 82%; animation-delay: -16.5s; animation-duration: 7s; } .spark-right:nth-child(24) { top: 92%; animation-delay: -11.5s; animation-duration: 10s; } .spark-right:nth-child(25) { top: 8%; animation-delay: -14.5s; animation-duration: 8s; opacity: 0.7; } .spark-right:nth-child(26) { top: 18%; animation-delay: -18s; animation-duration: 9s; } .spark-right:nth-child(27) { top: 28%; animation-delay: -13.5s; animation-duration: 7s; opacity: 0.8; } .spark-right:nth-child(28) { top: 78%; animation-delay: -19s; animation-duration: 10s; } .spark-right:nth-child(29) { top: 88%; animation-delay: -10.5s; animation-duration: 8s; opacity: 1; } .spark-right:nth-child(30) { top: 98%; animation-delay: -15.5s; animation-duration: 9s; }
+
+    /* Sparks moving LEFT */
+    .spark-left { position: absolute; width: 50px; height: 1px; background: linear-gradient(to left, transparent 0%, var(--theme-color-primary) 50%, transparent 100%); filter: drop-shadow(0 0 4px var(--theme-color-primary)); animation: slide-left 9s linear infinite; }
+    .spark-left:nth-child(1) { top: 12%; animation-delay: -1s; animation-duration: 9s; } .spark-left:nth-child(2) { top: 22%; animation-delay: -4s; animation-duration: 10s; opacity: 0.7; } .spark-left:nth-child(3) { top: 32%; animation-delay: -6s; animation-duration: 8s; } .spark-left:nth-child(4) { top: 42%; animation-delay: -2s; animation-duration: 11s; } .spark-left:nth-child(5) { top: 52%; animation-delay: -5s; animation-duration: 9s; } .spark-left:nth-child(6) { top: 62%; animation-delay: -3s; animation-duration: 10s; opacity: 0.9; } .spark-left:nth-child(7) { top: 72%; animation-delay: -1.5s; animation-duration: 8s; } .spark-left:nth-child(8) { top: 82%; animation-delay: -5.5s; animation-duration: 11s; opacity: 1; } .spark-left:nth-child(9) { top: 92%; animation-delay: -0.5s; animation-duration: 9s; } .spark-left:nth-child(10) { top: 8%; animation-delay: -3.5s; animation-duration: 10s; } .spark-left:nth-child(11) { top: 18%; animation-delay: -7s; animation-duration: 8s; } .spark-left:nth-child(12) { top: 78%; animation-delay: -2.5s; animation-duration: 10s; } .spark-left:nth-child(13) { top: 88%; animation-delay: -8s; animation-duration: 9s; opacity: 0.8; } .spark-left:nth-child(14) { top: 38%; animation-delay: -9s; animation-duration: 8s; } .spark-left:nth-child(15) { top: 48%; animation-delay: -1s; animation-duration: 11s; }
+    .spark-left:nth-child(16) { top: 14%; animation-delay: -11s; animation-duration: 8s; } .spark-left:nth-child(17) { top: 24%; animation-delay: -14s; animation-duration: 10s; opacity: 0.7; } .spark-left:nth-child(18) { top: 34%; animation-delay: -16s; animation-duration: 9s; } .spark-left:nth-child(19) { top: 44%; animation-delay: -12s; animation-duration: 11s; } .spark-left:nth-child(20) { top: 54%; animation-delay: -15s; animation-duration: 8s; } .spark-left:nth-child(21) { top: 64%; animation-delay: -13s; animation-duration: 10s; opacity: 0.9; } .spark-left:nth-child(22) { top: 74%; animation-delay: -11.5s; animation-duration: 9s; } .spark-left:nth-child(23) { top: 84%; animation-delay: -15.5s; animation-duration: 11s; opacity: 1; } .spark-left:nth-child(24) { top: 94%; animation-delay: -10.5s; animation-duration: 8s; } .spark-left:nth-child(25) { top: 6%; animation-delay: -13.5s; animation-duration: 10s; } .spark-left:nth-child(26) { top: 16%; animation-delay: -17s; animation-duration: 9s; } .spark-left:nth-child(27) { top: 76%; animation-delay: -12.5s; animation-duration: 8s; } .spark-left:nth-child(28) { top: 86%; animation-delay: -18s; animation-duration: 10s; opacity: 0.8; } .spark-left:nth-child(29) { top: 36%; animation-delay: -19s; animation-duration: 9s; } .spark-left:nth-child(30) { top: 46%; animation-delay: -11s; animation-duration: 11s; }
+    
+    .loader-text {
+      text-shadow: 0 0 8px var(--theme-color-primary);
+    }
+    
+    .logo-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+    }
+
+    .brine-brain-svg {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+    
+    .brain-glow {
+      stroke: var(--theme-color-primary);
+      stroke-width: 0.8;
+      fill: color-mix(in srgb, var(--theme-color-primary) 5%, black);
+      filter: drop-shadow(0 0 8px var(--theme-color-primary));
+      animation: brain-pulse-soft 5s ease-in-out infinite;
+    }
+    
+    .brain-core {
+        fill: var(--theme-color-primary);
+        filter: drop-shadow(0 0 15px var(--theme-color-primary));
+        animation: brain-core-pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes brain-pulse-soft {
+      0%, 100% {
+        fill-opacity: 0.05;
+        filter: drop-shadow(0 0 8px var(--theme-color-primary));
+      }
+      50% {
+        fill-opacity: 0.1;
+        filter: drop-shadow(0 0 16px var(--theme-color-primary));
+      }
+    }
+    
+     @keyframes brain-core-pulse {
+      0%, 100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+        filter: drop-shadow(0 0 15px var(--theme-color-primary));
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+        filter: drop-shadow(0 0 25px var(--theme-color-primary));
+      }
+    }
+    
+  </style>
+
+  <div class="relative z-10 flex flex-col items-center justify-center">
+    <div class="logo-container">
+      <svg class="brine-brain-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <path class="brain-glow" d="M50,9.7c-17.7,0-32.1,12.3-32.1,27.5c0,7.1,3.3,13.6,8.8,18.5c-0.2,1.3-0.3,2.6-0.3,4c0,9.6,7.8,17.4,17.4,17.4 c2.8,0,5.5-0.7,7.8-1.8c2.9,3.5,7.3,5.8,12.3,5.8c9.6,0,17.4-7.8,17.4-17.4c0-4.9-2-9.3-5.3-12.5c4.1-4.7,6.7-10.7,6.7-17.4 C82.1,22,67.7,9.7,50,9.7z M50,14.7c15,0,27.1,10.2,27.1,22.5c0,6.2-2.9,11.8-7.5,15.7c-0.6,0.5-0.8,1.3-0.5,2c0.6,1.4,1,3,1,4.7 c0,6.8-5.5,12.4-12.4,12.4c-4.1,0-7.7-2-10-5c-0.5-0.6-1.4-0.8-2.1-0.4c-2,1-4.3,1.5-6.7,1.5c-6.8,0-12.4-5.5-12.4-12.4 c0-1.4,0.3-2.8,0.8-4.1c0.2-0.7,0-1.5-0.5-2c-4.8-4.3-7.9-10.1-7.9-16.5C22.9,24.9,35,14.7,50,14.7z"/>
+            <circle transform-origin="center" class="brain-core" cx="50" cy="40" r="10"></circle>
+          </g>
+      </svg>
+    </div>
+    <h1 class="text-3xl font-bold mt-4 tracking-widest text-white loader-text">BRINE BOOSTER</h1>
+    <p class="text-gray-400 mt-2">Enhancing your mind...</p>
+  </div>
+</div>

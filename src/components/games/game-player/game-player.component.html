@@ -1,0 +1,368 @@
+<div class="max-w-4xl mx-auto animate-futuristic-fade-in">
+  @if (game(); as currentGame) {
+    @switch (gameState()) {
+      @case ('awaiting_api_key') {
+        <div class="flex flex-col items-center futuristic-card p-8 text-center min-h-[400px] justify-center">
+          <div class="card-content">
+            <div class="relative z-10 flex flex-col items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-12 h-12 text-yellow-400 mb-4">
+                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+              </svg>
+              <h1 class="text-2xl font-bold text-glow">API Key Required</h1>
+              <p class="text-gray-300 mt-2 max-w-md">This is an AI-powered game. Please provide a valid Gemini API key to play.</p>
+              <button (click)="modalService.showApiKeyModal()" class="futuristic-btn btn-primary mt-6">
+                Enter API Key
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+      @case ('start') {
+        <div>
+          <a routerLink="/games" class="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+            Back to Games
+          </a>
+          <div class="flex flex-col items-center futuristic-card p-8 text-center">
+            <div class="card-content">
+              <div class="relative z-10 flex flex-col items-center">
+                <span class="text-6xl mb-4">{{ currentGame.icon }}</span>
+                <h1 class="text-4xl font-bold text-glow">{{ currentGame.name }}</h1>
+                <p class="text-gray-400 mt-2 max-w-md">{{ currentGame.description }}</p>
+      
+                <div class="my-8">
+                  <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Select Difficulty Preset</h2>
+                  <div class="flex gap-4">
+                    @for (difficulty of difficulties; track difficulty) {
+                      <button 
+                        (click)="selectedDifficulty.set(difficulty)"
+                        class="futuristic-btn px-6 py-3"
+                        [class.btn-primary]="selectedDifficulty() === difficulty"
+                        [class.opacity-50]="selectedDifficulty() !== difficulty">
+                        {{ difficulty }}
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                @if (isCustomizable()) {
+                  <div class="w-full max-w-md mt-2">
+                    <details class="futuristic-card p-0 overflow-hidden bg-white/5" (toggle)="isSettingsPanelOpen.set($event.target.open)">
+                      <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+                        <h3 class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">Game Settings</h3>
+                        <svg class="w-6 h-6 transition-transform" [class.rotate-180]="isSettingsPanelOpen()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                      </summary>
+                      <div class="relative z-10 p-4 border-t border-white/10 bg-black/20 space-y-4 text-left">
+                        @switch (game().id) {
+                          @case ('memory-grid') {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-300 mb-2">Grid Size: {{ memoryGridSettings().size }}x{{ memoryGridSettings().size }}</label>
+                              <input type="range" min="3" max="6" [value]="memoryGridSettings().size" (input)="onMemoryGridSizeChange($event)">
+                            </div>
+                          }
+                          @case ('logic-blocks') {
+                            <div>
+                              <label class="block text-sm font-medium text-gray-300 mb-2">Grid Size: {{ logicBlocksSettings().size }}x{{ logicBlocksSettings().size }}</label>
+                              <input type="range" min="2" max="5" [value]="logicBlocksSettings().size" (input)="onLogicBlocksSizeChange($event)">
+                            </div>
+                            <div>
+                              <label class="block text-sm font-medium text-gray-300 mb-2">Time per Round: {{ logicBlocksSettings().time }}s</label>
+                              <input type="range" min="3" max="15" [value]="logicBlocksSettings().time" (input)="onLogicBlocksTimeChange($event)">
+                            </div>
+                          }
+                        }
+                         @if(selectedDifficulty() === 'Custom') {
+                          <p class="text-xs text-center text-yellow-300">"Custom" difficulty selected.</p>
+                         }
+                      </div>
+                    </details>
+                  </div>
+                }
+      
+                <button (click)="startGame()" class="futuristic-btn btn-primary text-xl px-12 py-4 mt-8">
+                  Start Game
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      @case ('instructions') {
+        <div class="futuristic-card p-8">
+          <div class="card-content">
+            <div class="relative z-10 flex flex-col items-center">
+              @if (instructionsLoading()) {
+                <div class="flex flex-col items-center justify-center min-h-[400px]">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+                  <p class="text-gray-400 mt-4">Generating instructions...</p>
+                </div>
+              } @else if (gameInstructions(); as instructions) {
+                <div class="w-full text-left">
+                  <h1 class="text-3xl font-bold text-glow text-center mb-6" [style.color]="'var(--theme-color-primary)'">{{ instructions.title }}</h1>
+
+                  <h2 class="text-xl font-semibold mb-3">How to Play</h2>
+                  <div class="space-y-4">
+                    @for (step of instructions.steps; track $index) {
+                      <div class="flex gap-4">
+                        <div class="flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold" [style.border-color]="'var(--theme-color-primary)'" [style.color]="'var(--theme-color-primary)'">
+                          {{ $index + 1 }}
+                        </div>
+                        <div>
+                          <p>{{ step.instruction }}</p>
+                          @if(step.example) {
+                            <p class="text-sm text-gray-400 mt-1 italic">e.g., {{ step.example }}</p>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  @if(instructions.tips.length > 0) {
+                    <h2 class="text-xl font-semibold mt-8 mb-3">💡 Pro Tips</h2>
+                    <ul class="space-y-2 list-disc list-inside text-gray-300">
+                      @for(tip of instructions.tips; track $index) {
+                        <li>{{ tip }}</li>
+                      }
+                    </ul>
+                  }
+                  
+                  <div class="flex gap-4 mt-8 justify-center">
+                    <button (click)="backToStart()" class="futuristic-btn px-8 py-3" style="background-color: rgba(255,255,255,0.1)">Back</button>
+                    <button (click)="proceedToPlay()" class="futuristic-btn btn-primary text-xl px-12 py-4">
+                      Let's Play!
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+      @case ('playing') {
+        <div>
+          @switch (currentGame.id) {
+            @case ('memory-grid') {
+              <app-memory-grid 
+                [gridSize]="memoryGridSettings().size" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('logic-blocks') {
+               <app-logic-blocks 
+                [gridSize]="logicBlocksSettings().size"
+                [roundTime]="logicBlocksSettings().time"
+                (gameFinished)="onGameFinished($event)" />
+            }
+             @case ('ai-riddles') {
+               <app-ai-riddles 
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+             @case ('focus-flow') {
+               <app-focus-flow 
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-quiz') {
+               <app-ai-quiz 
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-puzzles') {
+               <app-ai-puzzles
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-word-scramble') {
+               <app-ai-word-scramble
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-guess-the-prompt') {
+               <app-ai-guess-the-prompt
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-two-truths-lie') {
+               <app-ai-two-truths-lie
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-spot-the-difference') {
+               <app-ai-spot-the-difference
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-moral-dilemmas') {
+               <app-ai-moral-dilemmas
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('ai-creative-story') {
+               <app-ai-creative-story
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('number-sequence') {
+               <app-number-sequence
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('speed-math') {
+               <app-speed-math
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('pattern-match') {
+               <app-pattern-match
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('code-breaker') {
+               <app-code-breaker
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('spatial-spin') {
+               <app-spatial-spin
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('color-clash') {
+               <app-color-clash
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('card-flipper') {
+               <app-card-flipper
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('reaction-time') {
+               <app-reaction-time
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()" 
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('word-ladder') {
+                <app-word-ladder
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('trail-blazer') {
+                <app-trail-blazer
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Medium' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('odd-one-out') {
+                <app-odd-one-out
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Easy' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+            @case ('sudoku-mini') {
+                <app-sudoku-mini
+                [difficulty]="selectedDifficulty() === 'Custom' ? 'Easy' : selectedDifficulty()"
+                (gameFinished)="onGameFinished($event)" />
+            }
+          }
+        </div>
+      }
+      @case ('report') {
+        <div class="futuristic-card p-8">
+          <style>
+            .new-best-badge {
+              animation: new-best-pulse 1.5s infinite;
+            }
+            @keyframes new-best-pulse {
+              0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
+              }
+              50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px #fde047, 0 0 40px #fde047;
+              }
+            }
+          </style>
+          <div class="card-content">
+             <div class="relative z-10 flex flex-col items-center text-center">
+                <h1 class="text-4xl font-bold text-glow mb-2">Game Over</h1>
+                <p class="text-lg" [style.color]="'var(--theme-color-primary)'">Here is your report for {{ currentGame.name }}</p>
+
+                <div class="grid md:grid-cols-2 gap-6 w-full mt-8 text-left">
+                  <!-- Stats -->
+                  <div class="flex flex-col gap-4">
+                     @if (gameReport(); as report) {
+                      <div class="grid grid-cols-2 gap-4">
+                        @for (stat of report.stats; track stat.label) {
+                          <div class="bg-white/5 p-4 rounded-lg">
+                            <p class="text-sm text-gray-400">{{ stat.label }}</p>
+                            <p class="text-2xl font-bold">{{ stat.value }}</p>
+                          </div>
+                        }
+                        <div class="bg-white/5 p-4 rounded-lg relative overflow-hidden">
+                           @if (isNewBestScore()) {
+                            <span class="new-best-badge absolute top-2 right-2 text-xs font-bold text-yellow-900 bg-yellow-400 px-3 py-1 rounded-full shadow-lg">NEW BEST!</span>
+                          }
+                          <p class="text-sm text-gray-400">Best Score</p>
+                          <p class="text-2xl font-bold">{{ bestScore() }}</p>
+                        </div>
+                      </div>
+                     }
+                  </div>
+                  <!-- Chart -->
+                  <div class="bg-white/5 p-4 rounded-lg flex items-center justify-center min-h-[200px]">
+                    @if (gameReport()?.type === 'MemoryGrid') {
+                       <svg viewBox="0 0 100 100" class="w-full h-full max-w-[250px]">
+                          <defs>
+                              <linearGradient id="grad-report" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" [attr.stop-color]="'var(--theme-color-primary)'" stop-opacity="0.7"/>
+                                <stop offset="100%" [attr.stop-color]="'var(--card-glow-color)'" stop-opacity="0.7"/>
+                              </linearGradient>
+                          </defs>
+                          <polygon points="50,10 95,85 5,85" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+                           <polygon points="50,50 95,85 5,85" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
+                           <polygon points="50,10 95,20 5,20" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5" />
+                          <polygon [attr.points]="radarChartPoints" fill="url(#grad-report)" stroke="var(--theme-color-primary)" stroke-width="1.5"/>
+                          <text x="50" y="8" text-anchor="middle" font-size="6" fill="white">Focus</text>
+                          <text x="98" y="90" text-anchor="end" font-size="6" fill="white">Accuracy</text>
+                          <text x="2" y="90" text-anchor="start" font-size="6" fill="white">Speed</text>
+                        </svg>
+                    }
+                    @if (gameReport()?.type === 'LogicBlocks' || gameReport()?.type === 'PatternMatch') {
+                      @if(gameReport(); as report) {
+                        <svg viewBox="0 0 100 50" class="w-full h-full">
+                          <polyline 
+                            [attr.points]="report.chartData"
+                            fill="none" 
+                            stroke="var(--theme-color-primary)" 
+                            stroke-width="1.5"
+                            stroke-linecap="round" 
+                            stroke-linejoin="round" />
+                           <text x="50" y="48" text-anchor="middle" font-size="4" fill="white">Response Time per Round</text>
+                        </svg>
+                      }
+                    }
+                    @if (gameReport()?.type === 'AIRiddles' || gameReport()?.type === 'FocusFlow' || gameReport()?.type === 'AIQuiz' || gameReport()?.type === 'AIPuzzles' || gameReport()?.type === 'NumberSequence' || gameReport()?.type === 'SpeedMath' || gameReport()?.type === 'CodeBreaker' || gameReport()?.type === 'SpatialSpin' || gameReport()?.type === 'ColorClash' || gameReport()?.type === 'CardFlipper' || gameReport()?.type === 'ReactionTime' || gameReport()?.type === 'AIWordScramble' || gameReport()?.type === 'AIGuessThePrompt' || gameReport()?.type === 'AITwoTruthsLie' || gameReport()?.type === 'AISpotTheDifference' || gameReport()?.type === 'AIMoralDilemmas' || gameReport()?.type === 'AICreativeStory' || gameReport()?.type === 'WordLadder' || gameReport()?.type === 'TrailBlazer' || gameReport()?.type === 'OddOneOut' || gameReport()?.type === 'SudokuMini') {
+                       <div class="text-center">
+                          <span class="text-6xl">🎉</span>
+                          <p class="text-gray-400 mt-2">Great job!</p>
+                       </div>
+                    }
+                  </div>
+                </div>
+
+                <div class="flex gap-4 mt-8">
+                  <button (click)="playAgain()" class="futuristic-btn btn-primary px-8 py-3">Play Again</button>
+                  <a routerLink="/games" class="futuristic-btn px-8 py-3" style="background-color: rgba(255,255,255,0.1)">Back to Games</a>
+                </div>
+             </div>
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    <div class="text-center py-20">
+      <h2 class="text-2xl text-red-500">Game not found!</h2>
+      <a routerLink="/games" class="underline mt-4 inline-block">Return to Game List</a>
+    </div>
+  }
+</div>

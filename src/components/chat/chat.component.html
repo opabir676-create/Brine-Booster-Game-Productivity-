@@ -1,0 +1,145 @@
+<style>
+  .message-bubble {
+    animation: message-fade-in 0.4s ease-out forwards;
+    transform-origin: bottom left;
+  }
+  .message-bubble.user {
+    transform-origin: bottom right;
+  }
+  @keyframes message-fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+</style>
+<div class="flex flex-col h-screen max-w-4xl mx-auto animate-futuristic-fade-in px-4 pt-4 pb-[88px]">
+  <div class="futuristic-card flex-grow flex flex-col">
+    <div class="card-content h-full w-full flex flex-col">
+      <!-- Chat Messages -->
+      <div #chatContainer class="relative z-10 flex-grow p-4 space-y-6 overflow-y-auto">
+        @if (chatbotService.messages().length <= 1) {
+          <div class="flex flex-col items-center justify-center h-full text-center animate-futuristic-fade-in">
+              <div class="flex justify-between items-center w-full absolute top-4 px-4">
+                 <h1 class="text-2xl font-bold text-white text-glow" [style.color]="'var(--theme-color-primary)'">AI Chat</h1>
+                 <button (click)="clearChat()" title="Clear Chat History" class="futuristic-btn flex items-center gap-2 !py-2 !px-3" style="background-color: rgba(255,255,255,0.1)">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5Z" clip-rule="evenodd" /></svg>
+                    Clear
+                </button>
+              </div>
+              <span class="text-6xl mb-4">🤖</span>
+              <h2 class="text-2xl font-bold">How can I help?</h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6 w-full max-w-lg">
+                  @for (prompt of suggestedPrompts; track prompt) {
+                      <button (click)="sendMessage(prompt)" class="text-sm p-3 rounded-lg text-left transition-colors bg-white/5 hover:bg-white/10">
+                          {{prompt}}
+                      </button>
+                  }
+              </div>
+          </div>
+        }
+        @for (message of chatbotService.messages(); track $index) {
+          <div class="flex items-start gap-3" [class.flex-row-reverse]="message.role === 'user'">
+            <!-- Avatar -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1" [class.bg-cyan-500/30]="message.role === 'user'" [class.bg-gray-600]="message.role !== 'user'">
+              @if (message.role === 'user') {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5 text-cyan-200"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" /></svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5 text-gray-200"><path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v9A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 11.5 2h-7ZM5 8.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1-.75-.75ZM5.5 6a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5Z" clip-rule="evenodd" /></svg>
+              }
+            </div>
+            <!-- Bubble -->
+            <div class="message-bubble group flex items-end gap-2" [class.user]="message.role === 'user'">
+               <div 
+                class="max-w-full rounded-xl"
+                [class.rounded-tr-none]="message.role === 'user'"
+                [class.rounded-tl-none]="message.role !== 'user'"
+                [class.bg-cyan-600]="message.role === 'user'"
+                [style.background-color]="message.role === 'user' ? 'var(--theme-color-primary)' : ''"
+                [class.text-black]="message.role === 'user'"
+                [class.bg-gray-700]="message.role === 'model'"
+                [class.text-white]="message.role === 'model'"
+                [class.bg-red-800/50]="message.role === 'error'"
+                [class.text-red-200]="message.role === 'error'"
+                >
+                <div class="p-3">
+                  <div class="flex flex-col gap-2">
+                      @if (message.image) {
+                        <img [src]="message.image" class="rounded-lg max-h-48" alt="User upload">
+                      }
+                      @if (message.isStreaming && !message.text) {
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                          <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                          <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                        </div>
+                      } @else if (message.text) {
+                        <div class="text-sm leading-relaxed prose prose-invert whitespace-pre-line" [innerHTML]="parseMarkdown(message.text)"></div>
+                      }
+                  </div>
+                </div>
+              </div>
+              @if (message.role !== 'user' && !message.isStreaming && message.text) {
+                <button (click)="copyMessage(message, $index)" class="mb-1 p-1 rounded-full text-gray-500 hover:bg-white/10 hover:text-white transition-opacity">
+                  @if (copiedIndex() === $index) {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-green-400"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd" /></svg>
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4"><path d="M4.5 2A1.5 1.5 0 0 0 3 3.5v9A1.5 1.5 0 0 0 4.5 14h7a1.5 1.5 0 0 0 1.5-1.5v-3.379a3 3 0 0 1-1.5-.94V12.5a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h3.379c.318-.564.75-1.05 1.27-1.409A2.99 2.99 0 0 1 8.12 2H4.5Z" /><path d="M12.5 0A1.5 1.5 0 0 0 11 1.5v5A1.5 1.5 0 0 0 12.5 8h3A1.5 1.5 0 0 0 17 6.5v-5A1.5 1.5 0 0 0 15.5 0h-3ZM12 6.5V1.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5Z" /></svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Input Form -->
+      <div class="relative z-10 p-4 border-t border-white/10 shrink-0">
+        @if(settingsService.apiKeyValidationState() === 'valid') {
+          @if (selectedImage(); as img) {
+            <div class="mb-3 p-2 bg-black/30 rounded-lg flex items-start justify-between animate-futuristic-fade-in">
+              <img [src]="img" class="rounded-md max-h-24" alt="Image preview">
+              <button (click)="removeSelectedImage()" class="p-1 rounded-full text-gray-400 hover:bg-white/20 hover:text-white">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5"><path d="M2.22 2.22a.75.75 0 0 1 1.06 0L8 6.94l4.72-4.72a.75.75 0 1 1 1.06 1.06L9.06 8l4.72 4.72a.75.75 0 1 1-1.06 1.06L8 9.06l-4.72 4.72a.75.75 0 0 1-1.06-1.06L6.94 8 2.22 3.28a.75.75 0 0 1 0-1.06Z" /></svg>
+              </button>
+            </div>
+          }
+          <form (submit)="$event.preventDefault(); sendMessage()">
+            <div class="relative">
+              <button type="button" (click)="triggerFileInput()" title="Upload Image" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M15.621 4.379a3 3 0 0 0-4.242 0l-7 7a3 3 0 0 0 4.241 4.243h.001l.497-.5a.75.75 0 0 1 1.064 1.057l-.498.501-.002.002a4.5 4.5 0 0 1-6.364-6.364l7-7a4.5 4.5 0 0 1 6.364 6.364l-3.5 3.5a.75.75 0 0 1-1.06-1.06l3.5-3.5a3 3 0 0 0-4.243-4.242Z" clip-rule="evenodd" /></svg>
+              </button>
+              <input 
+                #fileInput 
+                type="file" 
+                (change)="onFileSelected($event)" 
+                accept="image/*" 
+                class="hidden">
+              <input 
+                type="text" 
+                [(ngModel)]="userInput"
+                name="userInput"
+                placeholder="Ask Briney anything, or upload an image..." 
+                class="w-full futuristic-input pl-12 pr-12 py-3"
+                autocomplete="off">
+              <button type="submit" [disabled]="(!userInput().trim() && !selectedImage()) || chatbotService.isLoading()" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors" [class.text-cyan-400]="(userInput().trim() || selectedImage()) && !chatbotService.isLoading()" [class.hover:bg-cyan-500/20]="(userInput().trim() || selectedImage()) && !chatbotService.isLoading()" [class.text-gray-600]="(!userInput().trim() && !selectedImage()) || chatbotService.isLoading()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6"><path d="M3.105 3.105a.75.75 0 0 1 .814-.156L18.42 9.58a.75.75 0 0 1 0 1.34l-14.502 6.627a.75.75 0 0 1-1.15-.815l2.3-6.841a.75.75 0 0 0 0-.244L2.25 4.075a.75.75 0 0 1 .855-.97Z" /></svg>
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="text-center">
+            <p class="text-yellow-400 text-sm">Please set a valid Gemini API key in Settings to use the chat.</p>
+            <button (click)="modalService.showApiKeyModal()" class="futuristic-btn btn-primary mt-2">
+              Enter API Key
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

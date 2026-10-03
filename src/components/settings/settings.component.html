@@ -1,0 +1,497 @@
+<style>
+  .tooltip-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .tooltip-icon {
+    margin-left: 8px;
+    cursor: help;
+  }
+  .tooltip-text {
+    visibility: hidden;
+    width: 220px;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -110px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
+  }
+  .tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+  .category-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  .category-btn.active {
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-primary);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+    background-color: color-mix(in srgb, var(--theme-color-primary) 20%, transparent);
+  }
+  .category-btn:hover:not(.active) {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+</style>
+<div class="flex flex-col gap-8 animate-futuristic-fade-in max-w-2xl mx-auto">
+  <header>
+    <h1 class="text-3xl font-bold text-white mb-2 text-glow" [style.color]="'var(--theme-color-primary)'">Settings</h1>
+    <p class="text-gray-400">Customize your Brine Booster experience.</p>
+  </header>
+
+  <!-- Profile Section -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Profile</h2>
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold" 
+               [style.background]="'radial-gradient(circle, var(--theme-color-primary) 0%, #000 100%)'">
+            U
+          </div>
+          <div>
+            <p class="text-lg font-bold">User</p>
+            <p class="text-sm text-gray-400">Brain Booster Enthusiast</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gemini API Section -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-2" [style.color]="'var(--theme-color-primary)'">Gemini AI</h2>
+        <p class="text-sm text-gray-400 mb-4">Add your API key to unlock AI-powered games and tools. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline hover:text-white" [style.color]="'var(--theme-color-primary)'">Google AI Studio</a>.</p>
+        
+        <div class="flex gap-2">
+          <input 
+            type="password" 
+            [value]="apiKeyInput()"
+            (input)="apiKeyInput.set($event.target.value)"
+            placeholder="Enter your Gemini API key" 
+            class="flex-grow futuristic-input">
+          
+          @if (settingsService.apiKey()) {
+            <button (click)="deleteApiKey()" class="futuristic-btn btn-danger">Delete</button>
+          }
+        </div>
+        <button (click)="updateApiKey()" class="w-full mt-3 futuristic-btn btn-primary">Save & Validate API Key</button>
+
+        <div class="mt-4 h-6">
+          @switch (settingsService.apiKeyValidationState()) {
+            @case ('validating') { <p class="text-yellow-400">Validating...</p> }
+            @case ('valid') { <p class="text-green-400">API Key is valid and active!</p> }
+            @case ('invalid') { <p class="text-red-400">Invalid API Key. Please check and try again.</p> }
+            @case ('idle') { 
+              @if (settingsService.apiKey()) {
+                 <p class="text-gray-400">Click Save & Validate to check your key.</p>
+              } @else {
+                 <p class="text-gray-400">Enter an API key to enable AI features.</p>
+              }
+            }
+          }
+        </div>
+        
+        <!-- Language Selection -->
+        <div class="mt-6">
+          <label for="language" class="block text-sm font-medium text-gray-300 mb-2">AI Language</label>
+          <select id="language" [value]="settingsService.language()" (change)="onLanguageChange($event)" class="w-full futuristic-input">
+            @for (lang of languages; track lang) {
+              <option [value]="lang">{{ lang }}</option>
+            }
+          </select>
+          <p class="text-xs text-gray-500 mt-2">All AI-generated content will be in the selected language.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Customization Section -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Customization</h2>
+        <div class="space-y-6">
+          
+          <!-- Global Animations Toggle -->
+          <div class="p-4 rounded-lg bg-black/30 border border-white/10">
+              <div class="flex items-center justify-between">
+                  <div class="tooltip-container">
+                      <label class="font-semibold text-gray-100">Enable All Animations</label>
+                      <span class="tooltip-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-5.5a1 1 0 0 0 1-1V6a1 1 0 0 0-2 0v2.5a1 1 0 0 0 1 1Zm-1.12-3.86a1.12 1.12 0 1 1 2.24 0 1.12 1.12 0 0 1-2.24 0Z" clip-rule="evenodd" /></svg>
+                      </span>
+                      <span class="tooltip-text">A master switch for all visual effects. Disabling this may improve performance.</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" [checked]="settingsService.animationsOn()" (change)="settingsService.animationsOn.set($event.target.checked)" class="sr-only peer">
+                      <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.animationsOn() ? 'var(--theme-color-primary)' : ''"></div>
+                  </label>
+              </div>
+
+              <!-- Granular Animation Controls -->
+              <div class="space-y-3 mt-4 pt-4 border-t border-white/10" [class.opacity-50]="!settingsService.animationsOn()" [class.pointer-events-none]="!settingsService.animationsOn()">
+                  <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-300">Loading Animation</label>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" [checked]="settingsService.loadingAnimation()" (change)="settingsService.loadingAnimation.set($event.target.checked)" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.loadingAnimation() ? 'var(--theme-color-primary)' : ''"></div>
+                      </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-300">Background Effects</label>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" [checked]="settingsService.backgroundAnimations()" (change)="settingsService.backgroundAnimations.set($event.target.checked)" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.backgroundAnimations() ? 'var(--theme-color-primary)' : ''"></div>
+                      </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-300">Card Effects</label>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" [checked]="settingsService.cardAnimations()" (change)="settingsService.cardAnimations.set($event.target.checked)" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.cardAnimations() ? 'var(--theme-color-primary)' : ''"></div>
+                      </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-300">UI Transitions</label>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" [checked]="settingsService.uiAnimations()" (change)="settingsService.uiAnimations.set($event.target.checked)" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.uiAnimations() ? 'var(--theme-color-primary)' : ''"></div>
+                      </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                      <label class="text-sm font-medium text-gray-300">Game Animations</label>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" [checked]="settingsService.gameAnimations()" (change)="settingsService.gameAnimations.set($event.target.checked)" class="sr-only peer">
+                          <div class="w-11 h-6 bg-gray-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.gameAnimations() ? 'var(--theme-color-primary)' : ''"></div>
+                      </label>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Color Pickers -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="themeColor" class="block text-sm font-medium text-gray-300 mb-2">Primary Color</label>
+                <div class="flex items-center gap-2 futuristic-input p-2">
+                   <input type="color" id="themeColor" [value]="settingsService.themeColor()" (input)="settingsService.themeColor.set($event.target.value)" class="w-8 h-8 rounded border-none bg-transparent cursor-pointer appearance-none">
+                   <span class="font-mono text-gray-400">{{ settingsService.themeColor() }}</span>
+                </div>
+              </div>
+              <div>
+                <div class="tooltip-container">
+                  <label for="glowColor" class="block text-sm font-medium text-gray-300 mb-2">Card Glow Color</label>
+                  <span class="tooltip-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-5.5a1 1 0 0 0 1-1V6a1 1 0 0 0-2 0v2.5a1 1 0 0 0 1 1Zm-1.12-3.86a1.12 1.12 0 1 1 2.24 0 1.12 1.12 0 0 1-2.24 0Z" clip-rule="evenodd" /></svg>
+                  </span>
+                  <span class="tooltip-text">This color creates the pulsing glow effect underneath cards and other elements.</span>
+                </div>
+                <div class="flex items-center gap-2 futuristic-input p-2">
+                   <input type="color" id="glowColor" [value]="settingsService.cardGlowColor()" (input)="settingsService.cardGlowColor.set($event.target.value)" class="w-8 h-8 rounded border-none bg-transparent cursor-pointer appearance-none">
+                   <span class="font-mono text-gray-400">{{ settingsService.cardGlowColor() }}</span>
+                </div>
+              </div>
+          </div>
+          <!-- UI Size -->
+          <div>
+            <label for="uiSize" class="block text-sm font-medium text-gray-300 mb-2">UI Size: {{ settingsService.uiScale() }}%</label>
+            <input type="range" id="uiSize" min="50" max="150" [value]="settingsService.uiScale()" (input)="onUiScaleChange($event)">
+          </div>
+
+          <div class="space-y-6" [class.opacity-50]="!settingsService.animationsOn() || !settingsService.cardAnimations()" [class.pointer-events-none]="!settingsService.animationsOn() || !settingsService.cardAnimations()">
+            <!-- Card Border Animation -->
+            <div>
+              <div class="p-4 rounded-lg bg-white/5">
+                <h3 class="font-semibold text-gray-200 mb-4">Card Border Animation</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Animation Style</label>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        @for(anim of borderAnimations; track anim.key) {
+                            <button 
+                                class="category-btn px-4 py-2 text-sm font-semibold rounded-full whitespace-nowrap"
+                                [class.active]="settingsService.cardBorderAnimation() === anim.key"
+                                (click)="settingsService.cardBorderAnimation.set(anim.key)">
+                                {{ anim.name }}
+                            </button>
+                        }
+                    </div>
+                  </div>
+                  <div>
+                    <label for="cardLighting" class="block text-sm font-medium text-gray-300 mb-2">Brightness: {{ (settingsService.cardLightingIntensity() / 6 * 100).toFixed(0) }}%</label>
+                    <input type="range" id="cardLighting" min="0" max="6" step="0.1" [value]="settingsService.cardLightingIntensity()" (input)="onCardLightingChange($event)">
+                  </div>
+                  <div>
+                    <label for="cardBorderThickness" class="block text-sm font-medium text-gray-300 mb-2">Thickness: {{ settingsService.cardBorderThickness() }}px</label>
+                    <input type="range" id="cardBorderThickness" min="1" max="5" step="1" [value]="settingsService.cardBorderThickness()" (input)="onCardBorderThicknessChange($event)">
+                  </div>
+                  <div>
+                    <label for="cardLightingSpeed" class="block text-sm font-medium text-gray-300 mb-2">Animation Speed: {{ cardLightingSpeedPercent() }}%</label>
+                    <input type="range" id="cardLightingSpeed" min="0" max="100" step="1" [value]="cardLightingSpeedPercent()" (input)="onCardLightingSpeedPercentChange($event)">
+                  </div>
+                </div>
+              </div>
+            </div>
+             <!-- Card Hover Effect -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                  <label class="text-sm font-medium text-gray-300">Card Hover Effect</label>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [checked]="settingsService.cardHoverEffectOn()" (change)="settingsService.cardHoverEffectOn.set($event.target.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.cardHoverEffectOn() ? 'var(--theme-color-primary)' : ''"></div>
+                  </label>
+              </div>
+              @if(settingsService.cardHoverEffectOn()) {
+                <div class="mt-4 p-4 rounded-lg bg-white/5">
+                    <label for="hoverIntensity" class="block text-sm font-medium text-gray-300 mb-2">Hover Intensity: {{ settingsService.cardHoverIntensity() }}%</label>
+                    <input type="range" id="hoverIntensity" min="0" max="100" [value]="settingsService.cardHoverIntensity()" (input)="onCardHoverIntensityChange($event)">
+                </div>
+              }
+            </div>
+            <!-- Card 3D Effect -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                  <div class="tooltip-container">
+                    <label class="text-sm font-medium text-gray-300">Card 3D Effect</label>
+                    <span class="tooltip-icon">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500"><path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm0-5.5a1 1 0 0 0 1-1V6a1 1 0 0 0-2 0v2.5a1 1 0 0 0 1 1Zm-1.12-3.86a1.12 1.12 0 1 1 2.24 0 1.12 1.12 0 0 1-2.24 0Z" clip-rule="evenodd" /></svg>
+                    </span>
+                    <span class="tooltip-text">Adds a perspective shift to cards when you hover over them.</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [checked]="settingsService.card3dOn()" (change)="settingsService.card3dOn.set($event.target.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [class.peer-checked:bg-cyan-600]="true" [style.background-color]="settingsService.card3dOn() ? 'var(--theme-color-primary)' : ''"></div>
+                  </label>
+              </div>
+               @if(settingsService.card3dOn()) {
+                <div class="mt-4 p-4 rounded-lg bg-white/5">
+                    <label for="tiltAngle" class="block text-sm font-medium text-gray-300 mb-2">3D Tilt Angle: {{ settingsService.cardTiltDegree() }}°</label>
+                    <input type="range" id="tiltAngle" min="0" max="20" [value]="settingsService.cardTiltDegree()" (input)="onCardTiltChange($event)">
+                </div>
+              }
+            </div>
+            <!-- Card Glow Effect -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                  <label class="text-sm font-medium text-gray-300">Card Glow Effect</label>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [checked]="settingsService.cardSmokeOn()" (change)="settingsService.cardSmokeOn.set($event.target.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [class.peer-checked:bg-cyan-600]="true" [style.background-color]="settingsService.cardSmokeOn() ? 'var(--theme-color-primary)' : ''"></div>
+                  </label>
+              </div>
+              @if(settingsService.cardSmokeOn()) {
+                <div class="mt-4 space-y-4 p-4 rounded-lg bg-white/5">
+                    <div>
+                       <label for="glowIntensity" class="block text-sm font-medium text-gray-300 mb-2">Intensity: {{ (settingsService.cardSmokeIntensity() / 3.0 * 100).toFixed(0) }}%</label>
+                       <input type="range" id="glowIntensity" min="0.1" max="3.0" step="0.1" [value]="settingsService.cardSmokeIntensity()" (input)="onSmokeIntensityChange($event)">
+                    </div>
+                </div>
+              }
+            </div>
+            <!-- Card Shimmer Effect -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                  <label class="text-sm font-medium text-gray-300">Card Shimmer Effect</label>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [checked]="settingsService.cardShimmerOn()" (change)="settingsService.cardShimmerOn.set($event.target.checked)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.cardShimmerOn() ? 'var(--theme-color-primary)' : ''"></div>
+                  </label>
+              </div>
+              @if(settingsService.cardShimmerOn()) {
+                <div class="mt-4 p-4 rounded-lg bg-white/5 space-y-6">
+                    <!-- Shimmer Style -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-300 mb-2">Animation Style</label>
+                      <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          @for(anim of shimmerAnimations; track anim.key) {
+                              <button 
+                                  class="category-btn px-4 py-2 text-sm font-semibold rounded-full whitespace-nowrap"
+                                  [class.active]="settingsService.cardShimmerAnimation() === anim.key"
+                                  (click)="settingsService.cardShimmerAnimation.set(anim.key)">
+                                  {{ anim.name }}
+                              </button>
+                          }
+                      </div>
+                    </div>
+                    <!-- Shimmer Color -->
+                    <div>
+                      <label for="shimmerColor" class="block text-sm font-medium text-gray-300 mb-2">Shimmer Color</label>
+                      <div class="flex items-center gap-2 futuristic-input p-2">
+                         <input type="color" id="shimmerColor" [value]="settingsService.cardShimmerColor()" (input)="settingsService.cardShimmerColor.set($event.target.value)" class="w-8 h-8 rounded border-none bg-transparent cursor-pointer appearance-none">
+                         <span class="font-mono text-gray-400">{{ settingsService.cardShimmerColor() }}</span>
+                      </div>
+                    </div>
+                    <!-- Shimmer Intensity -->
+                    <div>
+                      <label for="shimmerIntensity" class="block text-sm font-medium text-gray-300 mb-2">Shimmer Intensity: {{ settingsService.cardShimmerIntensity() }}%</label>
+                      <input type="range" id="shimmerIntensity" min="5" max="50" [value]="settingsService.cardShimmerIntensity()" (input)="onCardShimmerIntensityChange($event)">
+                    </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Sound Effects -->
+          <div>
+            <div class="flex items-center justify-between">
+                <label class="text-sm font-medium text-gray-300">Sound Effects</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [checked]="settingsService.soundOn()" (change)="settingsService.soundOn.set($event.target.checked)" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [class.peer-checked:bg-cyan-600]="true" [style.background-color]="settingsService.soundOn() ? 'var(--theme-color-primary)' : ''"></div>
+                </label>
+            </div>
+          </div>
+          
+          <!-- Background Effects -->
+          <div class="mt-4 p-4 rounded-lg bg-white/5 border-t border-white/10" [class.opacity-50]="!settingsService.animationsOn() || !settingsService.backgroundAnimations()" [class.pointer-events-none]="!settingsService.animationsOn() || !settingsService.backgroundAnimations()">
+            <h3 class="font-semibold text-gray-200 mb-4">Background Effects</h3>
+            <div class="space-y-6">
+                <!-- Grid Lines -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-sm font-medium text-gray-300">Background Grid</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" [checked]="settingsService.gridLinesOn()" (change)="settingsService.gridLinesOn.set($event.target.checked)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.gridLinesOn() ? 'var(--theme-color-primary)' : ''"></div>
+                        </label>
+                    </div>
+                    @if(settingsService.gridLinesOn()) {
+                      <div class="mt-4">
+                          <label for="gridIntensity" class="block text-sm font-medium text-gray-300 mb-2">Grid Line Intensity: {{ settingsService.gridLineIntensity() }}%</label>
+                          <input type="range" id="gridIntensity" min="1" max="50" [value]="settingsService.gridLineIntensity()" (input)="onGridLineIntensityChange($event)">
+                      </div>
+                    }
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Game & Tool Settings Section -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Game & Tool Settings</h2>
+        <div class="space-y-6">
+
+          <!-- Pomodoro Timer -->
+          <div class="p-4 rounded-lg bg-white/5">
+            <h3 class="font-semibold text-gray-200 mb-4">Pomodoro Timer Durations</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Work Session: {{ settingsService.pomodoroWorkMinutes() }} minutes</label>
+                <input type="range" min="15" max="60" [value]="settingsService.pomodoroWorkMinutes()" (input)="onPomodoroWorkChange($event)">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Short Break: {{ settingsService.pomodoroShortBreakMinutes() }} minutes</label>
+                <input type="range" min="1" max="15" [value]="settingsService.pomodoroShortBreakMinutes()" (input)="onPomodoroShortBreakChange($event)">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Long Break: {{ settingsService.pomodoroLongBreakMinutes() }} minutes</label>
+                <input type="range" min="10" max="30" [value]="settingsService.pomodoroLongBreakMinutes()" (input)="onPomodoroLongBreakChange($event)">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Speed Math -->
+          <div class="p-4 rounded-lg bg-white/5">
+            <h3 class="font-semibold text-gray-200 mb-4">Speed Math</h3>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Game Duration: {{ settingsService.speedMathDuration() }} seconds</label>
+              <input type="range" min="30" max="120" step="15" [value]="settingsService.speedMathDuration()" (input)="onSpeedMathDurationChange($event)">
+            </div>
+          </div>
+          
+          <!-- Reaction Time -->
+          <div class="p-4 rounded-lg bg-white/5">
+            <h3 class="font-semibold text-gray-200 mb-4">Reaction Time</h3>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2">Number of Rounds: {{ settingsService.reactionTimeRounds() }}</label>
+              <input type="range" min="3" max="10" [value]="settingsService.reactionTimeRounds()" (input)="onReactionTimeRoundsChange($event)">
+            </div>
+          </div>
+          
+          <!-- Card Flipper -->
+          <div class="p-4 rounded-lg bg-white/5" [class.opacity-50]="!settingsService.animationsOn() || !settingsService.gameAnimations()" [class.pointer-events-none]="!settingsService.animationsOn() || !settingsService.gameAnimations()">
+            <h3 class="font-semibold text-gray-200 mb-4">Card Flipper Game</h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-300">Card Flip Animation</label>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [checked]="settingsService.cardFlipAnimationOn()" (change)="settingsService.cardFlipAnimationOn.set($event.target.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.cardFlipAnimationOn() ? 'var(--theme-color-primary)' : ''"></div>
+                    </label>
+                </div>
+                @if(settingsService.cardFlipAnimationOn()) {
+                <div>
+                  <label for="cardFlipSpeed" class="block text-sm font-medium text-gray-300 mb-2">Flip Speed: {{ settingsService.cardFlipAnimationSpeed().toFixed(1) }}s</label>
+                  <input type="range" id="cardFlipSpeed" min="0.2" max="1.5" step="0.1" [value]="settingsService.cardFlipAnimationSpeed()" (input)="onCardFlipSpeedChange($event)">
+                </div>
+                }
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-medium text-gray-300">Match/Mismatch Animation</label>
+                     <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" [checked]="settingsService.cardMatchAnimationOn()" (change)="settingsService.cardMatchAnimationOn.set($event.target.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all" [style.background-color]="settingsService.cardMatchAnimationOn() ? 'var(--theme-color-primary)' : ''"></div>
+                    </label>
+                </div>
+                @if(settingsService.cardMatchAnimationOn()) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Match Animation Style</label>
+                  <div class="grid grid-cols-2 gap-2">
+                      <button class="category-btn px-4 py-2 text-sm" [class.active]="settingsService.cardMatchAnimationType() === 'glow'" (click)="settingsService.cardMatchAnimationType.set('glow')">Glow</button>
+                      <button class="category-btn px-4 py-2 text-sm" [class.active]="settingsService.cardMatchAnimationType() === 'pulse'" (click)="settingsService.cardMatchAnimationType.set('pulse')">Pulse</button>
+                  </div>
+                </div>
+                }
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data Management -->
+  <section class="futuristic-card p-5">
+    <div class="card-content">
+      <div class="relative z-10">
+        <h2 class="text-xl font-semibold mb-4" [style.color]="'var(--theme-color-primary)'">Data Management</h2>
+        <div class="flex flex-col md:flex-row gap-4">
+          <button class="flex-1 futuristic-btn" style="background-color: color-mix(in srgb, #3b82f6 80%, black); border-color: #3b82f6;">Backup Data</button>
+          <button class="flex-1 futuristic-btn" style="background-color: color-mix(in srgb, #9333ea 80%, black); border-color: #9333ea;">Restore Data</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

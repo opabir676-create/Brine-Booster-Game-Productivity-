@@ -1,0 +1,42 @@
+<div class="flex flex-col items-center gap-6">
+  <header class="w-full flex justify-between items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Round</p>
+      <p class="text-2xl font-bold">{{ round() }}</p>
+    </div>
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-glow" [style.color]="'var(--theme-color-primary)'">
+        @switch (gameState()) {
+          @case ('watching') { Watch Carefully... }
+          @case ('playing') { Repeat the Sequence }
+          @case ('gameover') { Game Over }
+        }
+      </h2>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Sequence</p>
+      <p class="text-2xl font-bold">{{ sequence().length }}</p>
+    </div>
+  </header>
+
+  <div 
+    class="grid gap-3 w-full max-w-md mx-auto"
+    [style.grid-template-columns]="'repeat(' + gridSize() + ', 1fr)'"
+    [class.pointer-events-none]="gameState() !== 'playing'">
+    @for (tile of tiles(); track tile.id) {
+      <div 
+        class="aspect-square rounded-lg transition-all duration-200 cursor-pointer flex items-center justify-center"
+        [class.bg-white/10]="tile.state === 'idle'"
+        [class.hover:bg-white/20]="tile.state === 'idle' && gameState() === 'playing'"
+        [class.bg-cyan-400]="tile.state === 'active'"
+        [style.--theme-color-primary]="'var(--theme-color-primary)'"
+        [class.shadow-[0_0_20px_var(--theme-color-primary)]]="tile.state === 'active'"
+        [class.bg-green-500]="tile.state === 'correct'"
+        [class.shadow-[0_0_20px_#22c55e]]="tile.state === 'correct'"
+        [class.bg-red-500]="tile.state === 'incorrect'"
+        [class.shadow-[0_0_20px_#ef4444]]="tile.state === 'incorrect'"
+        (click)="handleTileClick(tile.id)">
+      </div>
+    }
+  </div>
+</div>

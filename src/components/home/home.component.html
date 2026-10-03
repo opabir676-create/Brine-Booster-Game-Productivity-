@@ -1,0 +1,241 @@
+<style>
+  .icon-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  details > summary {
+    list-style: none; /* Hide default marker */
+  }
+  details > summary::-webkit-details-marker {
+    display: none; /* Hide default marker */
+  }
+  details[open] .summary-arrow {
+    transform: rotate(180deg);
+  }
+</style>
+
+<div class="flex flex-col gap-8 animate-futuristic-fade-in">
+  <!-- Header -->
+  <header class="flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-white text-glow" [style.text-shadow]="'0 0 8px ' + 'color-mix(in srgb, var(--theme-color-primary) 50%, transparent)'">Welcome Back</h1>
+      <p class="text-gray-400">Here's your daily brain boost report.</p>
+    </div>
+    <div class="flex items-center gap-2">
+       <a routerLink="/saved" title="View Saved Items" class="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors hover:shadow-[0_0_15px_var(--theme-color-primary)]">
+        <!-- Bookmark Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6" [style.color]="'var(--theme-color-primary)'">
+          <path d="m5.433 4.237.06.059.06.058a3.5 3.5 0 0 1 4.898 0l.06-.058.06-.059a3.5 3.5 0 0 1 4.898 4.898l-5.383 5.383a.75.75 0 0 1-1.06 0L4.237 9.194A3.5 3.5 0 0 1 5.433 4.237Z" />
+        </svg>        
+      </a>
+       <a routerLink="/achievements" title="View Achievements" class="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors hover:shadow-[0_0_15px_var(--theme-color-primary)]">
+        <!-- Trophy Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" [style.color]="'var(--theme-color-primary)'">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" transform="rotate(180 12 12)"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" transform="scale(-1, 1) translate(-24, 0) rotate(180 12 12)"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V3M12 21v-3m-7-6H2m20 0h-3M6.343 6.343L4.222 4.222m15.556 15.556l-2.121-2.121M6.343 17.657L4.222 19.778m15.556-15.556l-2.121 2.121" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 21h-6a2 2 0 01-2-2v-1a2 2 0 012-2h6a2 2 0 012 2v1a2 2 0 01-2 2zM9 9a3 3 0 016 0 3 3 0 01-6 0z"/>
+        </svg>
+      </a>
+      <a routerLink="/progress" title="View Progress" class="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors hover:shadow-[0_0_15px_var(--theme-color-primary)]">
+        <!-- Brain Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" [style.color]="'var(--theme-color-primary)'">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.871 14.893c-1.12.55-1.871 1.66-1.871 2.857v1.25h18v-1.25c0-1.197-.751-2.307-1.871-2.857C17.029 14.337 16 13.26 16 12c0-1.26.029-2.337 2.129-2.893 1.12-.55 1.871-1.66 1.871-2.857V5c0-1.105-2.239-2-5-2s-5 .895-5 2v1.25c0 1.197.751 2.307 1.871 2.857C9.971 9.663 10 10.74 10 12c0 1.26-.029 2.337-2.129 2.893zM9 8V7c0-1.105 1.343-2 3-2s3 .895 3 2v1m-6 8v1h6v-1" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+   <!-- Daily Challenge -->
+  <section>
+      <h2 class="text-xl font-semibold mb-4 text-glow" [style.color]="'var(--theme-color-primary)'">Daily Challenge</h2>
+      @if(dailyChallenge(); as challenge) {
+        <div class="futuristic-card p-5">
+            <div class="card-content">
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-4xl">🎯</span>
+                        <div>
+                            <p class="font-semibold text-lg">{{ challenge.description }}</p>
+                            <p class="text-sm text-gray-400">Reward: {{ challenge.reward.xp }} XP, {{ challenge.reward.coin }} 🪙</p>
+                        </div>
+                    </div>
+                    @if (challenge.completed) {
+                        <div class="flex items-center gap-2 text-green-400 font-bold px-4 py-2 rounded-full bg-green-500/20">
+                            <span>Completed</span>
+                            <span>✅</span>
+                        </div>
+                    } @else {
+                        <a [routerLink]="challenge.link" class="futuristic-btn btn-primary whitespace-nowrap">
+                            Start Challenge
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+      }
+  </section>
+
+  <!-- Stats -->
+  <section>
+    <h2 class="text-xl font-semibold mb-4 text-glow" [style.color]="'var(--theme-color-primary)'">Your Stats</h2>
+    <div class="flex flex-col gap-4">
+      <!-- Coins -->
+      <details class="futuristic-card p-0 overflow-hidden">
+        <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl icon-float">🪙</span>
+            <div>
+              <h3 class="text-xl font-bold">Coins</h3>
+              <p class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">{{ userStats().coin.toLocaleString() }}</p>
+            </div>
+          </div>
+          <svg class="w-6 h-6 transition-transform summary-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </summary>
+        <div class="relative z-10 p-4 border-t border-white/10 bg-black/20">
+          <h4 class="font-semibold mb-2">How to earn more coins:</h4>
+          <p class="text-gray-400 text-sm whitespace-pre-line">{{ descriptions()['coins'] }}</p>
+        </div>
+      </details>
+      <!-- XP -->
+       <details class="futuristic-card p-0 overflow-hidden">
+        <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl icon-float">✨</span>
+            <div>
+              <h3 class="text-xl font-bold">XP</h3>
+              <p class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">{{ userStats().xp.toLocaleString() }}</p>
+            </div>
+          </div>
+          <svg class="w-6 h-6 transition-transform summary-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </summary>
+        <div class="relative z-10 p-4 border-t border-white/10 bg-black/20">
+          <h4 class="font-semibold mb-2">How to earn more XP:</h4>
+          <p class="text-gray-400 text-sm whitespace-pre-line">{{ descriptions()['xp'] }}</p>
+        </div>
+      </details>
+       <!-- Streak -->
+       <details class="futuristic-card p-0 overflow-hidden">
+        <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl icon-float">🔥</span>
+            <div>
+              <h3 class="text-xl font-bold">Daily Streak</h3>
+              <p class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">{{ userStats().streak.toLocaleString() }} Days</p>
+            </div>
+          </div>
+          <svg class="w-6 h-6 transition-transform summary-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </summary>
+        <div class="relative z-10 p-4 border-t border-white/10 bg-black/20">
+          <h4 class="font-semibold mb-2">How Streaks Work:</h4>
+          <p class="text-gray-400 text-sm whitespace-pre-line">{{ descriptions()['streak'] }}</p>
+        </div>
+      </details>
+      <!-- Games Played -->
+      <details class="futuristic-card p-0 overflow-hidden">
+        <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl icon-float">🎮</span>
+            <div>
+              <h3 class="text-xl font-bold">Games Played</h3>
+              <p class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">{{ userStats().gamesPlayed.toLocaleString() }} Total</p>
+            </div>
+          </div>
+          <svg class="w-6 h-6 transition-transform summary-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </summary>
+        <div class="relative z-10 p-4 border-t border-white/10 bg-black/20">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-400">Games Played Today:</span>
+            <span class="font-bold text-white">{{ gamesPlayedToday() }}</span>
+          </div>
+        </div>
+      </details>
+      <!-- Best Scores -->
+      <details class="futuristic-card p-0 overflow-hidden">
+        <summary class="card-content p-4 flex justify-between items-center cursor-pointer">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl icon-float">🏆</span>
+            <div>
+              <h3 class="text-xl font-bold">Best Scores</h3>
+              <p class="text-lg font-semibold" [style.color]="'var(--theme-color-primary)'">{{ userStats().bestScore.toLocaleString() }} Overall</p>
+            </div>
+          </div>
+          <svg class="w-6 h-6 transition-transform summary-arrow" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+        </summary>
+        <div class="relative z-10 p-4 border-t border-white/10 bg-black/20">
+           <h4 class="font-semibold mb-2">Your Top 3 Games:</h4>
+            @if(topGames().length > 0) {
+              <ul class="text-sm space-y-2">
+                @for(game of topGames(); track game.name) {
+                  <li class="flex justify-between items-center bg-white/5 p-2 rounded-md">
+                    <span class="text-gray-300">{{ game.name }}</span>
+                    <span class="font-bold text-white">{{ game.score }}</span>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="text-sm text-gray-400">Play some games to set a new high score!</p>
+            }
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Gameplay Time Chart -->
+  <section>
+    <h2 class="text-xl font-semibold mb-4 text-glow" [style.color]="'var(--theme-color-primary)'">Gameplay Activity</h2>
+    <div class="futuristic-card p-4">
+      <div class="card-content">
+        <div class="relative z-10">
+          <div class="flex justify-between items-center mb-4">
+            <div>
+              <p class="text-gray-400 text-sm">Games Played Today</p>
+              <p class="text-2xl font-bold">{{ gamesPlayedToday() }}</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="px-3 py-1 text-sm rounded-full" [style.background-color]="'color-mix(in srgb, var(--theme-color-primary) 30%, transparent)'" [style.color]="'var(--theme-color-primary)'">Last 7 Days</button>
+            </div>
+          </div>
+          
+          <div class="h-48 rounded-lg flex flex-col items-center justify-center overflow-hidden">
+            @if(userStats().gamesPlayed > 0) {
+              <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+                <defs>
+                  <linearGradient id="activity-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" [attr.stop-color]="'var(--theme-color-primary)'" stop-opacity="0.4"/>
+                    <stop offset="100%" [attr.stop-color]="'var(--theme-color-primary)'" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="activity-stroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                     <stop offset="0%" [attr.stop-color]="'color-mix(in srgb, var(--theme-color-primary) 50%, transparent)'" />
+                     <stop offset="100%" [attr.stop-color]="'var(--theme-color-primary)'" />
+                  </linearGradient>
+                </defs>
+                <polygon [attr.points]="dailyActivityChartData().fill" fill="url(#activity-fill)" />
+                <polyline [attr.points]="dailyActivityChartData().line" fill="none" stroke="url(#activity-stroke)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                 <style>
+                  polygon, polyline {
+                    stroke-dasharray: 1000;
+                    stroke-dashoffset: 1000;
+                    animation: draw 2s ease-out forwards;
+                  }
+                  @keyframes draw { to { stroke-dashoffset: 0; } }
+                </style>
+              </svg>
+              <div class="flex justify-between w-full text-xs text-gray-500 px-2 mt-1">
+                @for(label of chartXAxisLabels(); track $index) {
+                  <span class="flex-1 text-center">{{ label }}</span>
+                }
+              </div>
+            } @else {
+              <p class="text-gray-500">Play some games to see your activity chart!</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

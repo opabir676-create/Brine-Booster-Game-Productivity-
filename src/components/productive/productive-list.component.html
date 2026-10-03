@@ -1,0 +1,94 @@
+<style>
+  .category-btn {
+    position: relative;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  .category-btn.active {
+    border-color: var(--theme-color-primary);
+    color: var(--theme-color-primary);
+    box-shadow: 0 0 15px color-mix(in srgb, var(--theme-color-primary) 30%, transparent);
+  }
+  .category-btn:hover:not(.active) {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .online-tag {
+    animation: pulse-glow 2s infinite ease-in-out;
+  }
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px #a855f7;
+    }
+    50% {
+      box-shadow: 0 0 15px #a855f7;
+    }
+  }
+</style>
+<div class="flex flex-col gap-8 animate-futuristic-fade-in">
+  <header>
+    <h1 class="text-3xl font-bold text-white mb-2 text-glow" [style.color]="'var(--theme-color-primary)'">Productivity Tools</h1>
+    <p class="text-gray-400">Tools to help you stay focused and build better habits, now with gamified rewards!</p>
+    <div class="relative mt-4">
+      <input 
+        type="text" 
+        placeholder="Search for a tool..." 
+        class="w-full futuristic-input pl-6 pr-12 py-3"
+        (input)="onSearch($event)">
+      <svg class="w-5 h-5 absolute right-5 top-1/2 -translate-y-1/2 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+  </header>
+
+  <!-- Categories -->
+  <nav class="flex gap-3 overflow-x-auto pb-2">
+    @for (category of categories; track category) {
+      <button 
+        (click)="selectCategory(category)"
+        class="category-btn px-4 py-2 text-sm font-semibold rounded-full whitespace-nowrap"
+        [class.active]="selectedCategory() === category">
+        {{ category }}
+      </button>
+    }
+  </nav>
+
+  <section>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (tool of filteredTools(); track tool.name) {
+        <a [routerLink]="tool.isImplemented ? ['/productive', tool.id] : null"
+           class="futuristic-card p-5 flex flex-col gap-3 relative"
+           [class.cursor-pointer]="tool.isImplemented"
+           [class.opacity-60]="!tool.isImplemented"
+           [class.pointer-events-none]="!tool.isImplemented">
+          <div class="card-content">
+            <div class="relative z-10">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-4">
+                  <span class="text-4xl">{{ tool.icon }}</span>
+                  <div>
+                    <h3 class="text-xl font-bold">{{ tool.name }}</h3>
+                    <p class="text-gray-400 text-sm">{{ tool.description }}</p>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                  @if(tool.isImplemented) {
+                    <span class="px-2 py-1 text-xs rounded-full" [style.background-color]="'color-mix(in srgb, var(--theme-color-primary) 30%, transparent)'" [style.color]="'var(--theme-color-primary)'">Available</span>
+                  } @else {
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-500/30 text-gray-300">Coming Soon</span>
+                  }
+                  @if (tool.isOnline) {
+                    <span class="online-tag px-2 py-1 text-xs rounded-full bg-purple-500/50 text-purple-200 border border-purple-400">Online</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      } @empty {
+        <p class="text-gray-500 col-span-full text-center py-10">No tools found for this filter.</p>
+      }
+    </div>
+  </section>
+</div>

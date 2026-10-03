@@ -1,0 +1,54 @@
+<div class="flex flex-col items-center gap-6 max-w-sm mx-auto">
+  @if (gameState() === 'playing') {
+    <!-- Header -->
+    <header class="w-full grid grid-cols-2 items-center futuristic-card p-4">
+      <div class="text-center">
+        <p class="text-sm text-gray-400">Mistakes</p>
+        <p class="text-2xl font-bold text-red-400">{{ mistakes() }}</p>
+      </div>
+      <div class="text-center">
+        <p class="text-sm text-gray-400">Time</p>
+        <p class="text-2xl font-bold">{{ timer() }}s</p>
+      </div>
+    </header>
+
+    <!-- Sudoku Grid -->
+    <div class="grid grid-cols-4 gap-1 bg-white/30 p-1 rounded-md">
+      @for(cell of grid(); track $index) {
+        <div 
+          (click)="selectCell($index)"
+          class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center text-3xl font-bold cursor-pointer transition-colors"
+          [class.bg-gray-800]="true"
+          [class.text-cyan-300]="cell.isOriginal"
+          [class.text-white]="!cell.isOriginal"
+          [class.bg-blue-900/50]="selectedCellIndex() === $index && !cell.isOriginal"
+          [class.border-2]="selectedCellIndex() === $index && !cell.isOriginal"
+          [style.border-color]="'var(--theme-color-primary)'"
+          [class.text-red-500]="cell.isInvalid"
+          [class.border-r-2]="isRightBorder($index)"
+          [class.border-b-2]="isBottomBorder($index)"
+          [class.border-white/30]="true"
+        >
+          {{ cell.value }}
+        </div>
+      }
+    </div>
+
+    <!-- Number Pad -->
+    <div class="flex justify-center gap-3">
+       @for(num of numbers; track num) {
+         <button 
+           (click)="enterNumber(num)"
+           class="w-16 h-16 futuristic-btn text-2xl"
+           [disabled]="selectedCellIndex() === null">
+           {{ num }}
+         </button>
+       }
+    </div>
+  } @else if (gameState() === 'finished') {
+    <div class="w-full futuristic-card p-8 text-center">
+        <h2 class="text-3xl font-bold text-green-400">Puzzle Solved!</h2>
+        <p class="text-lg text-gray-300 mt-2">Great job!</p>
+    </div>
+  }
+</div>

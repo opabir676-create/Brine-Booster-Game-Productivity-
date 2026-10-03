@@ -1,0 +1,47 @@
+<div class="flex flex-col items-center gap-6">
+  <!-- Header -->
+  <header class="w-full grid grid-cols-2 items-center futuristic-card p-4">
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Round</p>
+      <p class="text-2xl font-bold">{{ round() }} / {{ maxRounds() }}</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-gray-400">Last Time</p>
+      <p class="text-2xl font-bold">{{ getLastResult() }}ms</p>
+    </div>
+  </header>
+  
+  <!-- Game Area -->
+  <div 
+    (click)="handleClick()"
+    class="w-full h-80 rounded-lg flex flex-col items-center justify-center text-white text-center cursor-pointer transition-colors duration-200 futuristic-card"
+    [class.bg-red-800]="gameState() === 'waiting' || gameState() === 'tooSoon'"
+    [class.bg-green-600]="gameState() === 'ready'"
+    [class.bg-blue-800]="gameState() === 'clicked' || gameState() === 'setup'"
+    >
+    <div class="card-content">
+      <div class="relative z-10 p-8">
+        @switch (gameState()) {
+          @case ('setup') {
+            <h2 class="text-4xl font-bold">Reaction Time</h2>
+            <p class="mt-2 text-lg">Click when the screen turns green.</p>
+          }
+          @case ('waiting') {
+            <h2 class="text-4xl font-bold">Wait for green...</h2>
+          }
+          @case ('ready') {
+            <h2 class="text-4xl font-bold">Click!</h2>
+          }
+          @case ('clicked') {
+            <h2 class="text-4xl font-bold">{{ getLastResult() }}ms</h2>
+            <p class="mt-2 text-lg">Nice!</p>
+          }
+          @case ('tooSoon') {
+            <h2 class="text-4xl font-bold">Too Soon!</h2>
+            <p class="mt-2 text-lg">Wait for the screen to turn green before clicking.</p>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>

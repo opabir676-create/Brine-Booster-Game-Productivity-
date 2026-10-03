@@ -1,0 +1,84 @@
+<div class="flex flex-col items-center gap-6 max-w-lg mx-auto">
+  @switch (gameState()) {
+    @case ('setup') {
+      <div class="w-full text-center futuristic-card p-8 min-h-[400px] flex flex-col justify-center items-center">
+        <h2 class="text-2xl font-bold text-glow mb-4" [style.color]="'var(--theme-color-primary)'">AI Creative Story</h2>
+        <p class.text-gray-400 mb-6>Write a story together with an AI. It will start with an opening line, and you'll take turns adding one sentence at a time.</p>
+        <button (click)="startGame()" class="futuristic-btn btn-primary">Let's Write!</button>
+      </div>
+    }
+    @case ('loading') {
+      <div class="w-full futuristic-card p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2" [style.border-color]="'var(--theme-color-primary)'"></div>
+        <p class="text-gray-400 mt-4">AI is thinking of a good opening line...</p>
+      </div>
+    }
+    @case ('error') {
+       <div class="text-red-400 futuristic-card p-8 text-center min-h-[400px] flex flex-col items-center justify-center">
+        <p class="font-bold text-xl">An Error Occurred</p>
+        <p class="text-sm mt-2">Could not start the story. Please ensure your API key is valid.</p>
+        <button (click)="playAgain()" class="futuristic-btn btn-primary mt-4">Try Again</button>
+      </div>
+    }
+    @case ('playing') {
+        <header class="w-full text-center futuristic-card p-4">
+            <p class="text-sm text-gray-400">Turn</p>
+            <p class="text-2xl font-bold">{{ turn() + 1 }} / {{ maxTurns() }}</p>
+        </header>
+
+      <div class="w-full h-[50vh] futuristic-card flex flex-col">
+        <div #storyContainer class="flex-grow p-4 space-y-4 overflow-y-auto">
+           @for (turn of story(); track $index) {
+              <div class="flex items-end gap-2" [class.justify-end]="turn.author === 'user'">
+                <div 
+                  class="max-w-[80%] rounded-xl px-4 py-2"
+                  [class.bg-cyan-600]="turn.author === 'user'"
+                  [style.background-color]="turn.author === 'user' ? 'var(--theme-color-primary)' : ''"
+                  [class.text-black]="turn.author === 'user'"
+                  [class.bg-gray-700]="turn.author === 'model'"
+                  [class.text-white]="turn.author === 'model'"
+                  >
+                  <p class="text-sm leading-relaxed">{{ turn.text }}</p>
+                </div>
+              </div>
+            }
+            @if(isAiThinking()) {
+              <div class="flex">
+                <div class="max-w-[80%] rounded-xl px-4 py-2 bg-gray-700 text-white">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.3s]"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse [animation-delay:-0.15s]"></span>
+                    <span class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></span>
+                  </div>
+                </div>
+              </div>
+            }
+        </div>
+         <div class="p-4 border-t border-white/10 shrink-0">
+            <form (submit)="$event.preventDefault(); addSentence()">
+              <div class="relative">
+                <input 
+                  type="text" 
+                  [(ngModel)]="userInput"
+                  name="userInput"
+                  placeholder="Write the next sentence..." 
+                  class="w-full futuristic-input pr-12 py-3"
+                  autocomplete="off"
+                  [disabled]="isAiThinking()">
+                <button type="submit" [disabled]="!userInput().trim() || isAiThinking()" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full transition-colors" [class.text-cyan-400]="userInput().trim() && !isAiThinking()" [class.hover:bg-cyan-500/20]="userInput().trim() && !isAiThinking()" [class.text-gray-600]="!userInput().trim() || isAiThinking()">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6"><path d="M3.105 3.105a.75.75 0 0 1 .814-.156L18.42 9.58a.75.75 0 0 1 0 1.34l-14.502 6.627a.75.75 0 0 1-1.15-.815l2.3-6.841a.75.75 0 0 0 0-.244L2.25 4.075a.75.75 0 0 1 .855-.97Z" /></svg>
+                </button>
+              </div>
+            </form>
+          </div>
+      </div>
+    }
+     @case ('finished') {
+       <div class="w-full text-center futuristic-card p-8 min-h-[400px] flex flex-col justify-center items-center">
+        <h2 class="text-3xl font-bold text-glow mb-4" [style.color]="'var(--theme-color-primary)'">The End!</h2>
+        <p class.text-gray-400 mb-6>You and the AI have created a story together.</p>
+        <button (click)="playAgain()" class="futuristic-btn btn-primary">Write Another Story</button>
+      </div>
+    }
+  }
+</div>
